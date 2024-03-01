@@ -1904,7 +1904,7 @@ control MyIngress(inout headers hdr,
             meta.ecmp_hash: exact;
         }
         actions = {
-            ipv4_forward;
+            mpls_forward;
             drop;
         }
         default_action = drop;
@@ -1944,30 +1944,30 @@ control MyIngress(inout headers hdr,
                 // //FirwWall
                 bloom_filter: {
                     direction = 0;
-                    if (check_ports.apply().hit) {
-                        if (direction == 0) {
-                            compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);
-                        } else {
-                            compute_hashes(hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.tcp.dstPort, hdr.tcp.srcPort);
+                    check_ports.apply();
+                    if (direction == 0) {
+                        compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);
+                    } else {
+                        compute_hashes(hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.tcp.dstPort, hdr.tcp.srcPort);
+                    }
+                    // Packet comes from internal network
+                    if (direction == 0) {
+                        // If there is a syn we update the bloom filter and add the entry
+                        if (hdr.tcp.syn == 1){
+                            bloom_filter_1.write(reg_pos_one, 1);
+                            bloom_filter_2.write(reg_pos_two, 1);
                         }
-                        // Packet comes from internal network
-                        if (direction == 0) {
-                            // If there is a syn we update the bloom filter and add the entry
-                            if (hdr.tcp.syn == 1){
-                                bloom_filter_1.write(reg_pos_one, 1);
-                                bloom_filter_2.write(reg_pos_two, 1);
-                            }
-                        // Packet comes from outside
-                        } else if (direction == 1) {
-                            // Read bloom filter cells to check if there are 1's
-                            bloom_filter_1.read(reg_val_one, reg_pos_one);
-                            bloom_filter_2.read(reg_val_two, reg_pos_two);
-                            // only allow flow to pass if both entries are set
-                            if (reg_val_one != 1 || reg_val_two != 1) {
-                                drop();
-                            }
+                    // Packet comes from outside
+                    } else if (direction == 1) {
+                        // Read bloom filter cells to check if there are 1's
+                        bloom_filter_1.read(reg_val_one, reg_pos_one);
+                        bloom_filter_2.read(reg_val_two, reg_pos_two);
+                        // only allow flow to pass if both entries are set
+                        if (reg_val_one != 1 || reg_val_two != 1) {
+                            drop();
                         }
                     }
+
                 }
             }
         }
