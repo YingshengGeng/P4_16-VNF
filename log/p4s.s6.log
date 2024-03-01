@@ -1,0 +1,99 @@
+Calling target program-options parser
+[14:50:35.790] [bmv2] [D] [thread 291158] Set default default entry for table 'MyIngress.FEC_tbl': MyIngress.drop - 
+[14:50:35.790] [bmv2] [D] [thread 291158] Set default default entry for table 'tbl_nfc398': nfc398 - 
+[14:50:35.791] [bmv2] [D] [thread 291158] Set default default entry for table 'MyIngress.mpls_tbl': NoAction - 
+[14:50:35.791] [bmv2] [D] [thread 291158] Set default default entry for table 'MyIngress.check_ports': NoAction - 
+[14:50:35.791] [bmv2] [D] [thread 291158] Set default default entry for table 'tbl_nfc413': nfc413 - 
+[14:50:35.791] [bmv2] [D] [thread 291158] Set default default entry for table 'MyIngress.mpls_nfc': NoAction - 
+[14:50:35.791] [bmv2] [D] [thread 291158] Set default default entry for table 'MyIngress.ecmp_group_to_forward': MyIngress.drop - 
+Adding interface s6-eth1 as port 1
+[14:50:35.793] [bmv2] [D] [thread 291158] Adding interface s6-eth1 as port 1
+Adding interface s6-eth2 as port 2
+[14:50:35.795] [bmv2] [D] [thread 291158] Adding interface s6-eth2 as port 2
+[14:50:35.844] [bmv2] [I] [thread 291158] Starting Thrift server on port 9095
+[14:50:35.844] [bmv2] [I] [thread 291158] Thrift server was started
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Processing packet received on port 1
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Parser 'parser': start
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Parser 'parser' entering state 'start'
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Extracting header 'ethernet'
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Parser state 'start': key is 86dd
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] Bytes parsed: 14
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] Skipping checksum 'cksum_0' verification because target field invalid
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Parser 'parser': end
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Pipeline 'ingress': start
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(455) Condition "hdr.ipv4.isValid()" (node_2) is false
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(459) Condition "hdr.mpls[0].isValid()" (node_4) is false
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] Applying table 'MyIngress.check_ports'
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Looking up key:
+* standard_metadata.ingress_port: 0001
+* standard_metadata.egress_spec : 0000
+
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Table 'MyIngress.check_ports': miss
+[14:50:35.912] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Action entry is NoAction - 
+[14:50:35.912] [bmv2] [T] [thread 291164] [0.0] [cxt 0] Action NoAction
+[14:50:35.913] [bmv2] [T] [thread 291164] [0.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(465) Condition "hdr.mpls[0].isValid()" (node_8) is false
+[14:50:35.913] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Pipeline 'ingress': end
+[14:50:35.913] [bmv2] [D] [thread 291164] [0.0] [cxt 0] Egress port is 0
+[14:50:35.913] [bmv2] [D] [thread 291165] [0.0] [cxt 0] Pipeline 'egress': start
+[14:50:35.913] [bmv2] [D] [thread 291165] [0.0] [cxt 0] Pipeline 'egress': end
+[14:50:35.913] [bmv2] [D] [thread 291165] [0.0] [cxt 0] Deparser 'deparser': start
+[14:50:35.913] [bmv2] [T] [thread 291165] [0.0] [cxt 0] Skipping checksum 'cksum' update because condition not met
+[14:50:35.913] [bmv2] [D] [thread 291165] [0.0] [cxt 0] Deparsing header 'ethernet'
+[14:50:35.913] [bmv2] [D] [thread 291165] [0.0] [cxt 0] Deparser 'deparser': end
+[14:50:35.913] [bmv2] [D] [thread 291169] [0.0] [cxt 0] Transmitting packet of size 86 out of port 0
+[14:50:35.915] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Processing packet received on port 2
+[14:50:35.915] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Parser 'parser': start
+[14:50:35.915] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Parser 'parser' entering state 'start'
+[14:50:35.915] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Extracting header 'ethernet'
+[14:50:35.915] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Parser state 'start': key is 86dd
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] Bytes parsed: 14
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] Skipping checksum 'cksum_0' verification because target field invalid
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Parser 'parser': end
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Pipeline 'ingress': start
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(455) Condition "hdr.ipv4.isValid()" (node_2) is false
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(459) Condition "hdr.mpls[0].isValid()" (node_4) is false
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] Applying table 'MyIngress.check_ports'
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Looking up key:
+* standard_metadata.ingress_port: 0002
+* standard_metadata.egress_spec : 0000
+
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Table 'MyIngress.check_ports': miss
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Action entry is NoAction - 
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] Action NoAction
+[14:50:35.916] [bmv2] [T] [thread 291164] [1.0] [cxt 0] /home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4(465) Condition "hdr.mpls[0].isValid()" (node_8) is false
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Pipeline 'ingress': end
+[14:50:35.916] [bmv2] [D] [thread 291164] [1.0] [cxt 0] Egress port is 0
+[14:50:35.916] [bmv2] [D] [thread 291165] [1.0] [cxt 0] Pipeline 'egress': start
+[14:50:35.916] [bmv2] [D] [thread 291165] [1.0] [cxt 0] Pipeline 'egress': end
+[14:50:35.916] [bmv2] [D] [thread 291165] [1.0] [cxt 0] Deparser 'deparser': start
+[14:50:35.916] [bmv2] [T] [thread 291165] [1.0] [cxt 0] Skipping checksum 'cksum' update because condition not met
+[14:50:35.916] [bmv2] [D] [thread 291165] [1.0] [cxt 0] Deparsing header 'ethernet'
+[14:50:35.916] [bmv2] [D] [thread 291165] [1.0] [cxt 0] Deparser 'deparser': end
+[14:50:35.916] [bmv2] [D] [thread 291169] [1.0] [cxt 0] Transmitting packet of size 86 out of port 0
+[14:50:37.697] [bmv2] [T] [thread 291322] bm_get_config
+[14:50:37.706] [bmv2] [T] [thread 291322] bm_table_add_entry
+[14:50:37.707] [bmv2] [D] [thread 291322] Entry 0 added to table 'MyIngress.mpls_tbl'
+[14:50:37.707] [bmv2] [D] [thread 291322] Dumping entry 0
+Match key:
+* hdr.mpls[0].label   : EXACT     000001
+* hdr.mpls[0].s       : EXACT     00
+Action entry: MyIngress.mpls_forward - e76df4e42d1,1,
+
+[14:50:37.708] [bmv2] [T] [thread 291322] bm_table_add_entry
+[14:50:37.708] [bmv2] [D] [thread 291322] Entry 1 added to table 'MyIngress.mpls_tbl'
+[14:50:37.708] [bmv2] [D] [thread 291322] Dumping entry 1
+Match key:
+* hdr.mpls[0].label   : EXACT     000002
+* hdr.mpls[0].s       : EXACT     01
+Action entry: MyIngress.penultimate - 2e3212a5b491,2,
+
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
+open: No such file or directory
