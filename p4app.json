@@ -4,24 +4,45 @@
   "pcap_dump": true,
   "enable_log": true,
   "topology": {
-    "assignment_strategy": "l3",
-    "links": [["h1", "s1"],
-              ["s1", "s2"],
-              ["s1", "s3"],
-              ["s2", "s4"],
-              ["s3", "s4"],
-              ["s4", "s5"],
-              ["s4", "s6"],
-              ["s5", "s7"],
-              ["s6", "s7"],
-              ["s7", "h2"],
-              ["s7", "h3"]],
+    "assignment_strategy": "manual",
+    "links": [
+        ["h11", "s1"], ["h12", "s1"],
+        ["h21", "s2"], ["h22", "s2"],
+        ["s1", "s3"], ["s1", "s4"],
+        ["s2", "s4"], ["s2", "s3"]
+    ],
     "hosts": {
-      "h1": {
+      "h11": {
+        "ip": "10.0.1.1/24", 
+        "mac": "00:00:0a:00:01:01",
+        "commands": [
+          "route add default gw 10.0.1.1 dev h11-eth0",
+          "arp -i h11-eth0 -s 10.0.1.1 00:00:0a:00:01:01"
+        ]
       },
-      "h2": {
+      "h12": {
+        "ip": "10.0.1.2/24", 
+        "mac": "00:00:0a:00:01:01",
+        "commands": [
+          "route add default gw 10.0.1.2 dev h12-eth0",
+          "arp -i h12-eth0 -s 10.0.1.2 00:00:0a:00:01:02"
+        ]
       },
-      "h3": {
+      "h21": {
+        "ip": "10.0.2.1/24", 
+        "mac": "00:00:0a:00:02:01",
+        "commands": [
+          "route add default gw 10.0.2.1 dev h21-eth0",
+          "arp -i h21-eth0 -s 10.0.2.1 00:00:0a:00:02:01"
+        ]
+      },
+      "h22": {
+        "ip": "10.0.2.2/24", 
+        "mac": "00:00:0a:00:02:02",
+        "commands": [
+          "route add default gw 10.0.2.2 dev h22-eth0",
+          "arp -i h22-eth0 -s 10.0.2.2 00:00:0a:00:02:02"
+        ]
       }
     },
     "switches": {
@@ -36,15 +57,6 @@
       },
       "s4": {
         "cli_input": "sx-commands/s4-commands.txt"
-      },
-      "s5": {
-        "cli_input": "sx-commands/s5-commands.txt"
-      },
-      "s6": {
-        "cli_input": "sx-commands/s6-commands.txt"
-      },
-      "s7": {
-        "cli_input": "sx-commands/s7-commands.txt"
       }
     }
   }

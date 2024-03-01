@@ -1670,7 +1670,7 @@ control MyIngress(inout headers hdr,
         hdr.mpls[0].s = 0;
     }
 
-action mpls_ingress_7_hop(label_t label_1, label_t label_2, label_t label_3, label_t label_4, label_t label_5, label_t label_6, label_t label_7) {
+    action mpls_ingress_7_hop(label_t label_1, label_t label_2, label_t label_3, label_t label_4, label_t label_5, label_t label_6, label_t label_7) {
 
         hdr.ethernet.etherType = TYPE_MPLS;
 
@@ -1841,28 +1841,7 @@ action mpls_ingress_7_hop(label_t label_1, label_t label_2, label_t label_3, lab
     }
 
     action bloom_filter() {
-        // if (direction == 0) {
-        //     compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);
-        // } else {
-        //     compute_hashes(hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.tcp.dstPort, hdr.tcp.srcPort);
-        // }
-        // // Packet comes from internal network
-        // if (direction == 0) {
-        //     // If there is a syn we update the bloom filter and add the entry
-        //     if (hdr.tcp.syn == 1){
-        //         bloom_filter_1.write(reg_pos_one, 1);
-        //         bloom_filter_2.write(reg_pos_two, 1);
-        //     }
-        // // Packet comes from outside
-        // } else if (direction == 1) {
-        //     // Read bloom filter cells to check if there are 1's
-        //     bloom_filter_1.read(reg_val_one, reg_pos_one);
-        //     bloom_filter_2.read(reg_val_two, reg_pos_two);
-        //     // only allow flow to pass if both entries are set
-        //     if (reg_val_one != 1 || reg_val_two != 1) {
-        //         drop();
-        //     }
-        // }
+
     }
       //mpls header add methods are in include/mpls_extension.p4
     /* ******************* ipv4 Forward && Mpls header ******************* */
@@ -1908,7 +1887,9 @@ action mpls_ingress_7_hop(label_t label_1, label_t label_2, label_t label_3, lab
             hdr.mpls[0].label: exact;
         }
         actions = {
+            //Load Balance
             ecmp_group;
+            //FireWall
             bloom_filter;
             NoAction;
 
@@ -1951,18 +1932,41 @@ action mpls_ingress_7_hop(label_t label_1, label_t label_2, label_t label_3, lab
             FEC_tbl.apply();
             direction = 0; // default
         }
-        if (hdr.mpls[0].isValid()) {
-            mpls_tbl.apply();
-        }
 
-        check_ports.apply();
         //Network Service basd on mpls label
         if (hdr.mpls[0].isValid()) {
             switch (mpls_nfc.apply().action_run) {
                 //Load Balance
-                ecmp_group: { ecmp_group_to_forward.apply(); }
+                ecmp_group: {
+                    ecmp_group_to_forward.apply();
+                }
                 // //FirwWall
-                // bloom_filter: {} 
+                bloom_filter: {
+                    mpls_tbl.apply();
+                    check_ports.apply();
+                    if (direction == 0) {
+                        compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);
+                    } else {
+                        compute_hashes(hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.tcp.dstPort, hdr.tcp.srcPort);
+                    }
+                    // Packet comes from internal network
+                    if (direction == 0) {
+                        // If there is a syn we update the bloom filter and add the entry
+                        if (hdr.tcp.syn == 1){
+                            bloom_filter_1.write(reg_pos_one, 1);
+                            bloom_filter_2.write(reg_pos_two, 1);
+                        }
+                    // Packet comes from outside
+                    } else if (direction == 1) {
+                        // Read bloom filter cells to check if there are 1's
+                        bloom_filter_1.read(reg_val_one, reg_pos_one);
+                        bloom_filter_2.read(reg_val_two, reg_pos_two);
+                        // only allow flow to pass if both entries are set
+                        if (reg_val_one != 1 || reg_val_two != 1) {
+                            drop();
+                        }
+                    }
+                }
             }
         }
     }
