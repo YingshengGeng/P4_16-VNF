@@ -4,7 +4,7 @@
   "pcap_dump": true,
   "enable_log": true,
   "topology": {
-    "assignment_strategy": "manual",
+    "assignment_strategy": "mixed",
     "links": [
         ["h11", "s1"], ["h12", "s1"],
         ["h21", "s2"], ["h22", "s2"],

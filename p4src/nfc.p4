@@ -352,8 +352,8 @@ control MyIngress(inout headers hdr,
     /* ******************* ipv4 Forward && Mpls header ******************* */
     table FEC_tbl {
         key = {
-            hdr.ipv4.dstAddr: lpm;
-            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.srcAddr: lpm;
+            hdr.ipv4.dstAddr: exact;
         }
         actions = {
             ipv4_forward;
@@ -437,7 +437,9 @@ control MyIngress(inout headers hdr,
             FEC_tbl.apply();
             direction = 0; // default
         }
-        
+        if (hdr.mpls[0].isValid()) {
+            mpls_tbl.apply();
+        }
         //Network Service basd on mpls label
         if (hdr.mpls[0].isValid()) {
             switch (mpls_nfc.apply().action_run) {  
@@ -447,7 +449,6 @@ control MyIngress(inout headers hdr,
                 }
                 // //FirwWall
                 bloom_filter: {
-                    mpls_tbl.apply();
                     check_ports.apply();
                     if (direction == 0) {
                         compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);

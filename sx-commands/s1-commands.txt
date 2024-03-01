@@ -1,7 +1,21 @@
-table_add FEC_tbl mpls_ingress_4_hop 10.7.2.0/24 => 2 3 2 2
-table_add FEC_tbl mpls_ingress_4_hop 10.7.3.0/24 => 2 4 2 3
+#ipv4_forward
+#externel
+table_add  FEC_tbl ipv4_forward 10.0.2.0/24 10.0.1.11 =>  00:00:0a:00:01:0b 1
+table_add  FEC_tbl ipv4_forward 10.0.2.0/24 10.0.1.12 =>  00:00:0a:00:01:0c 2
 
-table_add mpls_tbl mpls_forward 2 0 => 00:00:00:02:01:00 2
-table_add mpls_tbl mpls_forward 3 0 => 62:ec:2a:bc:2f:39 3
+#internel
+table_add  FEC_tbl ipv4_forward 10.0.1.0/24 10.0.1.11 =>  00:00:0a:00:01:0b 1
+table_add  FEC_tbl ipv4_forward 10.0.1.0/24 10.0.1.12 =>  00:00:0a:00:01:0c 2
 
-table_add FEC_tbl ipv4_forward 10.1.1.0/24 => 00:00:0a:01:01:02 1
+#mpls_header
+table_add  FEC_tbl mpls_ingress_2_hop 10.0.1.0/24 10.0.2.21 =>  2 3
+table_add  FEC_tbl mpls_ingress_2_hop 10.0.1.0/24 10.0.2.22 =>  2 3
+
+#mpls forward 
+table_add  mpls_tbl mpls_forward 3 0 => 86:92:45:17:ac:f4 3
+table_add  mpls_tbl mpls_forward 4 0 => 52:46:50:00:d9:b8 4
+
+#mpls_function
+#firewall
+
+#load_balance

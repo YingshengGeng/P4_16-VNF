@@ -1,4 +1,5 @@
-table_add mpls_tbl mpls_forward 1 0 => 3a:1e:54:13:99:33 1
-table_add mpls_tbl mpls_forward 2 0 => d2:1f:3b:05:5c:70 2
-table_add mpls_tbl mpls_forward 3 0 => 56:e1:a0:65:9f:bc 3
-table_add mpls_tbl mpls_forward 4 0 => c6:b9:b7:b6:0d:6b 4
+#mpls forward 
+table_add  mpls_tbl mpls_forward 1 0 => 46:d5:6e:13:e6:80 1
+table_add  mpls_tbl mpls_forward 2 0 => d2:13:f7:52:c0:bf 2
+table_add  mpls_tbl mpls_forward 1 1 => 46:d5:6e:13:e6:80 1
+table_add  mpls_tbl mpls_forward 2 1 => d2:13:f7:52:c0:bf 2

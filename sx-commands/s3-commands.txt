@@ -1,3 +1,5 @@
-table_add mpls_tbl penultimate 1 1 =>  12:9e:df:44:7f:7b 1
-
-table_add mpls_tbl mpls_forward 2 0 => 5a:bb:3d:a4:c2:23 2
+#mpls forward 
+table_add  mpls_tbl mpls_forward 1 0 => be:4d:81:a8:00:a9 1
+table_add  mpls_tbl mpls_forward 2 0 => 82:46:58:de:db:b2 2
+table_add  mpls_tbl penultimate 1 1 => be:4d:81:a8:00:a9 1
+table_add  mpls_tbl penultimate 2 1 => 82:46:58:de:db:b2 2
