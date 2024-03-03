@@ -42,7 +42,7 @@ class RSVPCLI( Cmd ):
         """
         """
         print('======================================================================')
-        print('Welcome to the RSVP CLI')
+        print('Welcome to the NFC CLI')
         print('======================================================================')
         print('You can now make reservations for your hosts in the network.')
         print('To add a reservation run:')
@@ -218,3 +218,40 @@ class RSVPCLI( Cmd ):
         for edge, bw in self.controller.links_capacity.items():
             print("{} -> {}".format(edge, bw))
         
+    def do_add_fw_entry(self, line=""):
+
+        # gets arguments
+        args = line.split()
+
+        if len(args) < 3:
+            print("Not enough args!")
+            return
+        
+        elif len(args) == 3:
+            src, dst, sw_id =  args[:3]
+        
+        else:
+            print("Too many args!")
+            return
+
+        # add entry
+        res = self.controller.add_fw_entry(src, dst, sw_id)
+
+    def do_add_lb_entry(self, line=""):
+
+        # gets arguments
+        args = line.split()
+
+        if len(args) < 3:
+            print("Not enough args!")
+            return
+        
+        elif len(args) == 3:
+            src, dst, sw_id =  args[:3]
+        
+        else:
+            print("Too many args!")
+            return
+
+        # add entry
+        res = self.controller.add_lb_entry(src, dst, sw_id)

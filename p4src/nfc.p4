@@ -349,13 +349,24 @@ control MyIngress(inout headers hdr,
     }
       //mpls header add methods are in include/mpls_extension.p4
     /* ******************* ipv4 Forward && Mpls header ******************* */
-    table FEC_tbl {
+    table ipv4_lpm {
         key = {
-            hdr.ipv4.srcAddr: lpm;
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr: lpm;
         }
         actions = {
             ipv4_forward;
+            NoAction;
+        }
+        default_action = NoAction;
+        size = TABLE_SIZE;
+    }
+
+    table FEC_tbl {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
+        }
+        actions = {
             mpls_ingress_1_hop;
             mpls_ingress_2_hop;
             mpls_ingress_3_hop;
@@ -419,8 +430,8 @@ control MyIngress(inout headers hdr,
     /* ******************* IPv4 FireWall ******************** */
     table check_ports {
         key = {
-            standard_metadata.ingress_port: exact;
-            standard_metadata.egress_spec: exact;
+            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
         }
         actions = {
             set_direction;
@@ -431,24 +442,28 @@ control MyIngress(inout headers hdr,
     }
 
     apply {
-        //forward or add mpls header
+        //ipv4 forward or add mpls header
         if (hdr.ipv4.isValid()) {
-            FEC_tbl.apply();
-            direction = 0; // default
+            if (!ipv4_lpm.apply().hit) {
+                FEC_tbl.apply();
+            }  
         }
+
+        //mpls forward
         if (hdr.mpls[0].isValid()) {
             mpls_tbl.apply();
         }
+
         //Network Service basd on mpls label
         if (hdr.mpls[0].isValid()) {
             switch (mpls_nfc.apply().action_run) {  
-                //Load Balance
+                // Load Balance
                 ecmp_group: { 
                     ecmp_group_to_forward.apply(); 
                 }
-                // //FirwWall
+                // FirwWall
                 bloom_filter: {
-                    direction = 0;
+                    direction = 0; // default
                     check_ports.apply();
                     if (direction == 0) {
                         compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort);
@@ -472,7 +487,6 @@ control MyIngress(inout headers hdr,
                             drop();
                         }
                     }
-            
                 } 
             }
         }

@@ -708,8 +708,14 @@
       "primitives" : []
     },
     {
-      "name" : "MyIngress.mpls_ingress_1_hop",
+      "name" : "NoAction",
       "id" : 3,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "MyIngress.mpls_ingress_1_hop",
+      "id" : 4,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -854,7 +860,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_2_hop",
-      "id" : 4,
+      "id" : 5,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -1117,7 +1123,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_3_hop",
-      "id" : 5,
+      "id" : 6,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -1498,7 +1504,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_4_hop",
-      "id" : 6,
+      "id" : 7,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -1997,7 +2003,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_5_hop",
-      "id" : 7,
+      "id" : 8,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -2614,7 +2620,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_6_hop",
-      "id" : 8,
+      "id" : 9,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -3349,7 +3355,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_7_hop",
-      "id" : 9,
+      "id" : 10,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -4202,7 +4208,7 @@
     },
     {
       "name" : "MyIngress.mpls_ingress_8_hop",
-      "id" : 10,
+      "id" : 11,
       "runtime_data" : [
         {
           "name" : "label_1",
@@ -5173,28 +5179,6 @@
     },
     {
       "name" : "MyIngress.drop",
-      "id" : 11,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "mark_to_drop",
-          "parameters" : [
-            {
-              "type" : "header",
-              "value" : "standard_metadata"
-            }
-          ],
-          "source_info" : {
-            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 279,
-            "column" : 8,
-            "source_fragment" : "mark_to_drop(standard_metadata)"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.drop",
       "id" : 12,
       "runtime_data" : [],
       "primitives" : [
@@ -5238,8 +5222,30 @@
       ]
     },
     {
-      "name" : "MyIngress.ipv4_forward",
+      "name" : "MyIngress.drop",
       "id" : 14,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 279,
+            "column" : 8,
+            "source_fragment" : "mark_to_drop(standard_metadata)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.ipv4_forward",
+      "id" : 15,
       "runtime_data" : [
         {
           "name" : "dstAddr",
@@ -5348,121 +5354,6 @@
             "line" : 288,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "MyIngress.mpls_forward",
-      "id" : 15,
-      "runtime_data" : [
-        {
-          "name" : "dstAddr",
-          "bitwidth" : 48
-        },
-        {
-          "name" : "port",
-          "bitwidth" : 9
-        }
-      ],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ethernet", "srcAddr"]
-            },
-            {
-              "type" : "field",
-              "value" : ["ethernet", "dstAddr"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 293,
-            "column" : 8,
-            "source_fragment" : "hdr.ethernet.srcAddr = hdr.ethernet.dstAddr"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ethernet", "dstAddr"]
-            },
-            {
-              "type" : "runtime_data",
-              "value" : 0
-            }
-          ],
-          "source_info" : {
-            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 294,
-            "column" : 8,
-            "source_fragment" : "hdr.ethernet.dstAddr = dstAddr"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["standard_metadata", "egress_spec"]
-            },
-            {
-              "type" : "runtime_data",
-              "value" : 1
-            }
-          ],
-          "source_info" : {
-            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 296,
-            "column" : 8,
-            "source_fragment" : "standard_metadata.egress_spec = port"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["mpls[1]", "ttl"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["mpls[0]", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 298,
-            "column" : 8,
-            "source_fragment" : "hdr.mpls[1].ttl = hdr.mpls[0].ttl - 1"
           }
         }
       ]
@@ -5583,8 +5474,123 @@
       ]
     },
     {
-      "name" : "MyIngress.penultimate",
+      "name" : "MyIngress.mpls_forward",
       "id" : 17,
+      "runtime_data" : [
+        {
+          "name" : "dstAddr",
+          "bitwidth" : 48
+        },
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "srcAddr"]
+            },
+            {
+              "type" : "field",
+              "value" : ["ethernet", "dstAddr"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 293,
+            "column" : 8,
+            "source_fragment" : "hdr.ethernet.srcAddr = hdr.ethernet.dstAddr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["ethernet", "dstAddr"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 294,
+            "column" : 8,
+            "source_fragment" : "hdr.ethernet.dstAddr = dstAddr"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 1
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 296,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["mpls[1]", "ttl"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["mpls[0]", "ttl"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 298,
+            "column" : 8,
+            "source_fragment" : "hdr.mpls[1].ttl = hdr.mpls[0].ttl - 1"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.penultimate",
+      "id" : 18,
       "runtime_data" : [
         {
           "name" : "dstAddr",
@@ -5718,7 +5724,7 @@
     },
     {
       "name" : "MyIngress.ecmp_group",
-      "id" : 18,
+      "id" : 19,
       "runtime_data" : [
         {
           "name" : "ecmp_group_id",
@@ -5875,7 +5881,7 @@
     },
     {
       "name" : "MyIngress.compute_hashes",
-      "id" : 19,
+      "id" : 20,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6126,7 +6132,7 @@
     },
     {
       "name" : "MyIngress.compute_hashes",
-      "id" : 20,
+      "id" : 21,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6377,7 +6383,7 @@
     },
     {
       "name" : "MyIngress.set_direction",
-      "id" : 21,
+      "id" : 22,
       "runtime_data" : [
         {
           "name" : "dir",
@@ -6408,13 +6414,13 @@
     },
     {
       "name" : "MyIngress.bloom_filter",
-      "id" : 22,
+      "id" : 23,
       "runtime_data" : [],
       "primitives" : []
     },
     {
-      "name" : "nfc376",
-      "id" : 23,
+      "name" : "nfc387",
+      "id" : 24,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6431,7 +6437,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 376,
+            "line" : 387,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].label"
           }
@@ -6450,7 +6456,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 377,
+            "line" : 388,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].s"
           }
@@ -6458,8 +6464,8 @@
       ]
     },
     {
-      "name" : "nfc451",
-      "id" : 24,
+      "name" : "nfc466",
+      "id" : 25,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6476,7 +6482,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 451,
+            "line" : 466,
             "column" : 20,
             "source_fragment" : "direction = 0"
           }
@@ -6484,8 +6490,8 @@
       ]
     },
     {
-      "name" : "nfc462",
-      "id" : 25,
+      "name" : "nfc477",
+      "id" : 26,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6506,7 +6512,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 462,
+            "line" : 477,
             "column" : 28,
             "source_fragment" : "bloom_filter_1.write(reg_pos_one, 1)"
           }
@@ -6529,7 +6535,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 463,
+            "line" : 478,
             "column" : 28,
             "source_fragment" : "bloom_filter_2.write(reg_pos_two, 1)"
           }
@@ -6537,8 +6543,8 @@
       ]
     },
     {
-      "name" : "nfc468",
-      "id" : 26,
+      "name" : "nfc483",
+      "id" : 27,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6559,7 +6565,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 468,
+            "line" : 483,
             "column" : 24,
             "source_fragment" : "bloom_filter_1.read(reg_val_one, reg_pos_one)"
           }
@@ -6582,7 +6588,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 469,
+            "line" : 484,
             "column" : 24,
             "source_fragment" : "bloom_filter_2.read(reg_val_two, reg_pos_two)"
           }
@@ -6590,8 +6596,8 @@
       ]
     },
     {
-      "name" : "nfc391",
-      "id" : 27,
+      "name" : "nfc402",
+      "id" : 28,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6608,7 +6614,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 391,
+            "line" : 402,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].label"
           }
@@ -6616,8 +6622,8 @@
       ]
     },
     {
-      "name" : "nfc481",
-      "id" : 28,
+      "name" : "nfc495",
+      "id" : 29,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -6634,7 +6640,7 @@
           ],
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 481,
+            "line" : 495,
             "column" : 12,
             "source_fragment" : "hdr.mpls.pop_front(1)"
           }
@@ -6655,23 +6661,17 @@
       "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "MyIngress.FEC_tbl",
+          "name" : "MyIngress.ipv4_lpm",
           "id" : 0,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
             "line" : 352,
             "column" : 10,
-            "source_fragment" : "FEC_tbl"
+            "source_fragment" : "ipv4_lpm"
           },
           "key" : [
             {
               "match_type" : "lpm",
-              "name" : "hdr.ipv4.srcAddr",
-              "target" : ["ipv4", "srcAddr"],
-              "mask" : null
-            },
-            {
-              "match_type" : "exact",
               "name" : "hdr.ipv4.dstAddr",
               "target" : ["ipv4", "dstAddr"],
               "mask" : null
@@ -6683,34 +6683,76 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [14, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-          "actions" : ["MyIngress.ipv4_forward", "MyIngress.mpls_ingress_1_hop", "MyIngress.mpls_ingress_2_hop", "MyIngress.mpls_ingress_3_hop", "MyIngress.mpls_ingress_4_hop", "MyIngress.mpls_ingress_5_hop", "MyIngress.mpls_ingress_6_hop", "MyIngress.mpls_ingress_7_hop", "MyIngress.mpls_ingress_8_hop", "MyIngress.drop"],
-          "base_default_next" : "node_4",
+          "action_ids" : [15, 0],
+          "actions" : ["MyIngress.ipv4_forward", "NoAction"],
+          "base_default_next" : null,
           "next_tables" : {
-            "MyIngress.ipv4_forward" : "node_4",
-            "MyIngress.mpls_ingress_1_hop" : "node_4",
-            "MyIngress.mpls_ingress_2_hop" : "node_4",
-            "MyIngress.mpls_ingress_3_hop" : "node_4",
-            "MyIngress.mpls_ingress_4_hop" : "node_4",
-            "MyIngress.mpls_ingress_5_hop" : "node_4",
-            "MyIngress.mpls_ingress_6_hop" : "node_4",
-            "MyIngress.mpls_ingress_7_hop" : "node_4",
-            "MyIngress.mpls_ingress_8_hop" : "node_4",
-            "MyIngress.drop" : "node_4"
+            "__MISS__" : "MyIngress.FEC_tbl",
+            "__HIT__" : "node_5"
           },
           "default_entry" : {
-            "action_id" : 11,
+            "action_id" : 0,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
           }
         },
         {
-          "name" : "tbl_nfc376",
+          "name" : "MyIngress.FEC_tbl",
           "id" : 1,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 376,
+            "line" : 364,
+            "column" : 10,
+            "source_fragment" : "FEC_tbl"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 256,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [4, 5, 6, 7, 8, 9, 10, 11, 12],
+          "actions" : ["MyIngress.mpls_ingress_1_hop", "MyIngress.mpls_ingress_2_hop", "MyIngress.mpls_ingress_3_hop", "MyIngress.mpls_ingress_4_hop", "MyIngress.mpls_ingress_5_hop", "MyIngress.mpls_ingress_6_hop", "MyIngress.mpls_ingress_7_hop", "MyIngress.mpls_ingress_8_hop", "MyIngress.drop"],
+          "base_default_next" : "node_5",
+          "next_tables" : {
+            "MyIngress.mpls_ingress_1_hop" : "node_5",
+            "MyIngress.mpls_ingress_2_hop" : "node_5",
+            "MyIngress.mpls_ingress_3_hop" : "node_5",
+            "MyIngress.mpls_ingress_4_hop" : "node_5",
+            "MyIngress.mpls_ingress_5_hop" : "node_5",
+            "MyIngress.mpls_ingress_6_hop" : "node_5",
+            "MyIngress.mpls_ingress_7_hop" : "node_5",
+            "MyIngress.mpls_ingress_8_hop" : "node_5",
+            "MyIngress.drop" : "node_5"
+          },
+          "default_entry" : {
+            "action_id" : 12,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "tbl_nfc387",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
+            "line" : 387,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].label: exact; ..."
           },
@@ -6721,14 +6763,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [23],
-          "actions" : ["nfc376"],
+          "action_ids" : [24],
+          "actions" : ["nfc387"],
           "base_default_next" : "MyIngress.mpls_tbl",
           "next_tables" : {
-            "nfc376" : "MyIngress.mpls_tbl"
+            "nfc387" : "MyIngress.mpls_tbl"
           },
           "default_entry" : {
-            "action_id" : 23,
+            "action_id" : 24,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -6736,10 +6778,10 @@
         },
         {
           "name" : "MyIngress.mpls_tbl",
-          "id" : 2,
+          "id" : 3,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 374,
+            "line" : 385,
             "column" : 10,
             "source_fragment" : "mpls_tbl"
           },
@@ -6763,27 +6805,27 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [15, 17, 0],
+          "action_ids" : [16, 18, 1],
           "actions" : ["MyIngress.mpls_forward", "MyIngress.penultimate", "NoAction"],
-          "base_default_next" : "node_7",
+          "base_default_next" : "node_8",
           "next_tables" : {
-            "MyIngress.mpls_forward" : "node_7",
-            "MyIngress.penultimate" : "node_7",
-            "NoAction" : "node_7"
+            "MyIngress.mpls_forward" : "node_8",
+            "MyIngress.penultimate" : "node_8",
+            "NoAction" : "node_8"
           },
           "default_entry" : {
-            "action_id" : 0,
+            "action_id" : 1,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
           }
         },
         {
-          "name" : "tbl_nfc391",
-          "id" : 3,
+          "name" : "tbl_nfc402",
+          "id" : 4,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 391,
+            "line" : 402,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].label"
           },
@@ -6794,14 +6836,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [27],
-          "actions" : ["nfc391"],
+          "action_ids" : [28],
+          "actions" : ["nfc402"],
           "base_default_next" : "MyIngress.mpls_nfc",
           "next_tables" : {
-            "nfc391" : "MyIngress.mpls_nfc"
+            "nfc402" : "MyIngress.mpls_nfc"
           },
           "default_entry" : {
-            "action_id" : 27,
+            "action_id" : 28,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -6809,10 +6851,10 @@
         },
         {
           "name" : "MyIngress.mpls_nfc",
-          "id" : 4,
+          "id" : 5,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 389,
+            "line" : 400,
             "column" : 10,
             "source_fragment" : "mpls_nfc"
           },
@@ -6830,16 +6872,16 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [18, 22, 1],
+          "action_ids" : [19, 23, 2],
           "actions" : ["MyIngress.ecmp_group", "MyIngress.bloom_filter", "NoAction"],
-          "base_default_next" : "node_23",
+          "base_default_next" : "node_24",
           "next_tables" : {
             "MyIngress.ecmp_group" : "MyIngress.ecmp_group_to_forward",
-            "MyIngress.bloom_filter" : "tbl_nfc451",
-            "NoAction" : "node_23"
+            "MyIngress.bloom_filter" : "tbl_nfc466",
+            "NoAction" : "node_24"
           },
           "default_entry" : {
-            "action_id" : 1,
+            "action_id" : 2,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -6847,10 +6889,10 @@
         },
         {
           "name" : "MyIngress.ecmp_group_to_forward",
-          "id" : 5,
+          "id" : 6,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 406,
+            "line" : 417,
             "column" : 10,
             "source_fragment" : "ecmp_group_to_forward"
           },
@@ -6874,26 +6916,26 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [16, 12],
+          "action_ids" : [17, 13],
           "actions" : ["MyIngress.mpls_forward", "MyIngress.drop"],
-          "base_default_next" : "node_23",
+          "base_default_next" : "node_24",
           "next_tables" : {
-            "MyIngress.mpls_forward" : "node_23",
-            "MyIngress.drop" : "node_23"
+            "MyIngress.mpls_forward" : "node_24",
+            "MyIngress.drop" : "node_24"
           },
           "default_entry" : {
-            "action_id" : 12,
+            "action_id" : 13,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
           }
         },
         {
-          "name" : "tbl_nfc451",
-          "id" : 6,
+          "name" : "tbl_nfc466",
+          "id" : 7,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 451,
+            "line" : 466,
             "column" : 30,
             "source_fragment" : "="
           },
@@ -6904,14 +6946,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [24],
-          "actions" : ["nfc451"],
+          "action_ids" : [25],
+          "actions" : ["nfc466"],
           "base_default_next" : "MyIngress.check_ports",
           "next_tables" : {
-            "nfc451" : "MyIngress.check_ports"
+            "nfc466" : "MyIngress.check_ports"
           },
           "default_entry" : {
-            "action_id" : 24,
+            "action_id" : 25,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -6919,24 +6961,24 @@
         },
         {
           "name" : "MyIngress.check_ports",
-          "id" : 7,
+          "id" : 8,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 420,
+            "line" : 431,
             "column" : 10,
             "source_fragment" : "check_ports"
           },
           "key" : [
             {
               "match_type" : "exact",
-              "name" : "standard_metadata.ingress_port",
-              "target" : ["standard_metadata", "ingress_port"],
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
               "mask" : null
             },
             {
               "match_type" : "exact",
-              "name" : "standard_metadata.egress_spec",
-              "target" : ["standard_metadata", "egress_spec"],
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
               "mask" : null
             }
           ],
@@ -6946,15 +6988,15 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [21, 2],
+          "action_ids" : [22, 3],
           "actions" : ["MyIngress.set_direction", "NoAction"],
-          "base_default_next" : "node_13",
+          "base_default_next" : "node_14",
           "next_tables" : {
-            "MyIngress.set_direction" : "node_13",
-            "NoAction" : "node_13"
+            "MyIngress.set_direction" : "node_14",
+            "NoAction" : "node_14"
           },
           "default_entry" : {
-            "action_id" : 2,
+            "action_id" : 3,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -6962,10 +7004,10 @@
         },
         {
           "name" : "tbl_compute_hashes",
-          "id" : 8,
+          "id" : 9,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 454,
+            "line" : 469,
             "column" : 24,
             "source_fragment" : "compute_hashes(hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort)"
           },
@@ -6976,14 +7018,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [19],
+          "action_ids" : [20],
           "actions" : ["MyIngress.compute_hashes"],
-          "base_default_next" : "node_16",
+          "base_default_next" : "node_17",
           "next_tables" : {
-            "MyIngress.compute_hashes" : "node_16"
+            "MyIngress.compute_hashes" : "node_17"
           },
           "default_entry" : {
-            "action_id" : 19,
+            "action_id" : 20,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -6991,10 +7033,10 @@
         },
         {
           "name" : "tbl_compute_hashes_0",
-          "id" : 9,
+          "id" : 10,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 456,
+            "line" : 471,
             "column" : 24,
             "source_fragment" : "compute_hashes(hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.tcp.dstPort, hdr.tcp.srcPort)"
           },
@@ -7005,25 +7047,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [20],
+          "action_ids" : [21],
           "actions" : ["MyIngress.compute_hashes"],
-          "base_default_next" : "node_16",
+          "base_default_next" : "node_17",
           "next_tables" : {
-            "MyIngress.compute_hashes" : "node_16"
+            "MyIngress.compute_hashes" : "node_17"
           },
           "default_entry" : {
-            "action_id" : 20,
+            "action_id" : 21,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_nfc462",
-          "id" : 10,
+          "name" : "tbl_nfc477",
+          "id" : 11,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 462,
+            "line" : 477,
             "column" : 28,
             "source_fragment" : "bloom_filter_1.write(reg_pos_one, 1); ..."
           },
@@ -7034,25 +7076,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [25],
-          "actions" : ["nfc462"],
-          "base_default_next" : "node_23",
+          "action_ids" : [26],
+          "actions" : ["nfc477"],
+          "base_default_next" : "node_24",
           "next_tables" : {
-            "nfc462" : "node_23"
+            "nfc477" : "node_24"
           },
           "default_entry" : {
-            "action_id" : 25,
+            "action_id" : 26,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_nfc468",
-          "id" : 11,
+          "name" : "tbl_nfc483",
+          "id" : 12,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 468,
+            "line" : 483,
             "column" : 24,
             "source_fragment" : "bloom_filter_1.read(reg_val_one, reg_pos_one); ..."
           },
@@ -7063,14 +7105,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [26],
-          "actions" : ["nfc468"],
-          "base_default_next" : "node_21",
+          "action_ids" : [27],
+          "actions" : ["nfc483"],
+          "base_default_next" : "node_22",
           "next_tables" : {
-            "nfc468" : "node_21"
+            "nfc483" : "node_22"
           },
           "default_entry" : {
-            "action_id" : 26,
+            "action_id" : 27,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -7078,10 +7120,10 @@
         },
         {
           "name" : "tbl_drop",
-          "id" : 12,
+          "id" : 13,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 472,
+            "line" : 487,
             "column" : 28,
             "source_fragment" : "drop()"
           },
@@ -7092,25 +7134,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [13],
+          "action_ids" : [14],
           "actions" : ["MyIngress.drop"],
-          "base_default_next" : "node_23",
+          "base_default_next" : "node_24",
           "next_tables" : {
-            "MyIngress.drop" : "node_23"
+            "MyIngress.drop" : "node_24"
           },
           "default_entry" : {
-            "action_id" : 13,
+            "action_id" : 14,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_nfc481",
-          "id" : 13,
+          "name" : "tbl_nfc495",
+          "id" : 14,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 481,
+            "line" : 495,
             "column" : 12,
             "source_fragment" : "hdr.mpls.pop_front(1)"
           },
@@ -7121,14 +7163,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [28],
-          "actions" : ["nfc481"],
+          "action_ids" : [29],
+          "actions" : ["nfc495"],
           "base_default_next" : null,
           "next_tables" : {
-            "nfc481" : null
+            "nfc495" : null
           },
           "default_entry" : {
-            "action_id" : 28,
+            "action_id" : 29,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -7142,7 +7184,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 435,
+            "line" : 446,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -7157,15 +7199,15 @@
               }
             }
           },
-          "true_next" : "MyIngress.FEC_tbl",
-          "false_next" : "node_4"
+          "true_next" : "MyIngress.ipv4_lpm",
+          "false_next" : "node_5"
         },
         {
-          "name" : "node_4",
+          "name" : "node_5",
           "id" : 1,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 439,
+            "line" : 453,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].isValid()"
           },
@@ -7180,15 +7222,15 @@
               }
             }
           },
-          "true_next" : "tbl_nfc376",
-          "false_next" : "node_7"
+          "true_next" : "tbl_nfc387",
+          "false_next" : "node_8"
         },
         {
-          "name" : "node_7",
+          "name" : "node_8",
           "id" : 2,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 443,
+            "line" : 458,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].isValid()"
           },
@@ -7203,15 +7245,15 @@
               }
             }
           },
-          "true_next" : "tbl_nfc391",
-          "false_next" : "node_23"
+          "true_next" : "tbl_nfc402",
+          "false_next" : "node_24"
         },
         {
-          "name" : "node_13",
+          "name" : "node_14",
           "id" : 3,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 453,
+            "line" : 468,
             "column" : 24,
             "source_fragment" : "direction == 0"
           },
@@ -7233,11 +7275,11 @@
           "false_next" : "tbl_compute_hashes_0"
         },
         {
-          "name" : "node_16",
+          "name" : "node_17",
           "id" : 4,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 459,
+            "line" : 474,
             "column" : 24,
             "source_fragment" : "direction == 0"
           },
@@ -7255,15 +7297,15 @@
               }
             }
           },
-          "true_next" : "node_17",
-          "false_next" : "node_19"
+          "true_next" : "node_18",
+          "false_next" : "node_20"
         },
         {
-          "name" : "node_17",
+          "name" : "node_18",
           "id" : 5,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 461,
+            "line" : 476,
             "column" : 28,
             "source_fragment" : "hdr.tcp.syn == 1"
           },
@@ -7281,15 +7323,15 @@
               }
             }
           },
-          "true_next" : "tbl_nfc462",
-          "false_next" : "node_23"
+          "true_next" : "tbl_nfc477",
+          "false_next" : "node_24"
         },
         {
-          "name" : "node_19",
+          "name" : "node_20",
           "id" : 6,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 466,
+            "line" : 481,
             "column" : 31,
             "source_fragment" : "direction == 1"
           },
@@ -7307,15 +7349,15 @@
               }
             }
           },
-          "true_next" : "tbl_nfc468",
-          "false_next" : "node_23"
+          "true_next" : "tbl_nfc483",
+          "false_next" : "node_24"
         },
         {
-          "name" : "node_21",
+          "name" : "node_22",
           "id" : 7,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 471,
+            "line" : 486,
             "column" : 28,
             "source_fragment" : "reg_val_one != 1 || reg_val_two != 1"
           },
@@ -7354,14 +7396,14 @@
             }
           },
           "true_next" : "tbl_drop",
-          "false_next" : "node_23"
+          "false_next" : "node_24"
         },
         {
-          "name" : "node_23",
+          "name" : "node_24",
           "id" : 8,
           "source_info" : {
             "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-            "line" : 480,
+            "line" : 494,
             "column" : 12,
             "source_fragment" : "hdr.mpls[0].isValid()"
           },
@@ -7377,7 +7419,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "tbl_nfc481"
+          "true_next" : "tbl_nfc495"
         }
       ]
     },
@@ -7386,7 +7428,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
-        "line" : 489,
+        "line" : 503,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

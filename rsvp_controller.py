@@ -57,13 +57,6 @@ class RSVPController(object):
         """
 
         links_capacity = {}
-        # Iterates all the edges in the topology formed by switches
-        for src, dst in self.topo.keep_only_p4switches().edges:
-            bw = self.topo.edges[(src, dst)]['bw']
-            # add both directions
-            links_capacity[(src, dst)] = bw
-            links_capacity[(dst, src)] = bw
-
         return links_capacity
     
     def reservations_timeout_thread(self, refresh_rate = 1):
