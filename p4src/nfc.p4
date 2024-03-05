@@ -21,7 +21,7 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_2_hop(label_t label1, label_t label2) {
@@ -29,11 +29,11 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_3_hop(label_t label1, label_t label2, label_t label3) {
@@ -43,15 +43,15 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
     }
 
@@ -61,19 +61,19 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_5_hop(label_t label1, label_t label2, label_t label3, label_t label4, label_t label5) {
@@ -82,23 +82,23 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_6_hop(label_t label1, label_t label2, label_t label3, label_t label4, label_t label5, label_t label6) {
@@ -107,27 +107,27 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_7_hop(label_t label1, label_t label2, label_t label3, label_t label4, label_t label5, label_t label6, label_t label7) {
@@ -136,31 +136,31 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label7, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label7, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_ingress_8_hop(label_t label1, label_t label2, label_t label3, label_t label4, label_t label5, label_t label6, label_t label7, label_t label8) {
@@ -169,35 +169,35 @@ control MyIngress(inout headers hdr,
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label1, 0 ,1, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label2, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label3, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label4, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label5, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label6, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label7, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label7, 0 ,0, hdr.ipv4.ttl};
 
         hdr.mpls.push_front(1);
         hdr.mpls[0].setValid();
-        hdr.mpls[0] = {label8, 0 ,0, hdr.ipv4.ttl - 1};
+        hdr.mpls[0] = {label8, 0 ,0, hdr.ipv4.ttl};
     }
 
     action mpls_pop() {
