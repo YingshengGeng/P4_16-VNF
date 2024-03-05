@@ -6,6 +6,9 @@
 #include "include/parsers.p4"
 #include "include/mpls_extension.p4"
 
+#define BLOOM_FILTER_ENTRIES 4096
+#define BLOOM_FILTER_BIT_WIDTH 32
+#define HASH
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
@@ -13,6 +16,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {  
     
+    //MARK:will extend
+    register<bit<BLOOM_FILTER_BIT_WIDTH>>(BLOOM_FILTER_ENTRIES) bloom_reg;
 
     //MARK: the mpls labels is are reverse
     action mpls_ingress_1_hop(label_t label1) {
@@ -250,6 +255,17 @@ control MyIngress(inout headers hdr,
     }
 
 
+    action ecmp_group(bit<14> ecmp_group_id, bit<16> num_nhops) {
+
+        meta.ecmp_group_id = ecmp_group_id;
+        //hash(output_field, (crc16 or crc32), (bit<1>)0, {fields to hash}, (bit<16>)modulo)
+        //five tuple: src ip, dst ip, src port, dst port, protocol
+        hash(meta.ecmp_hash, HashAlgorithm.crc32, (bit<1>)0, 
+            {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort,hdr.tcp.dstPort, hdr.ipv4.protocol}, 
+            num_nhops);
+        
+    }
+
     /* ******************* ipv4 Forward ******************* */
     table ipv4_lpm {
         key = {
@@ -278,6 +294,7 @@ control MyIngress(inout headers hdr,
             mpls_ingress_6_hop;
             mpls_ingress_7_hop;
             mpls_ingress_8_hop;
+            ecmp_group;
             drop; //UPDATE
             NoAction;
         }
@@ -305,14 +322,36 @@ control MyIngress(inout headers hdr,
   
     /* ******************* MPLS function ******************* */
     
-    /* ******************* IPv4 Load Balance ******************** */
-
+    /* ******************* MPLS Load Balance ******************** */
+    table ecmp_group_to_nhop {
+        key = {
+            meta.ecmp_group_id: exact;
+            meta.ecmp_hash: exact;
+        }
+        actions = {
+            mpls_ingress_1_hop;
+            mpls_ingress_2_hop;
+            mpls_ingress_3_hop;
+            mpls_ingress_4_hop;
+            mpls_ingress_5_hop;
+            mpls_ingress_6_hop;
+            mpls_ingress_7_hop;
+            mpls_ingress_8_hop;
+            NoAction;
+        }
+        default_action = NoAction;
+        size = TABLE_SIZE;
+    }
     /* ******************* IPv4 FireWall ******************** */
 
     apply {
         //Try add mpls header
         if (hdr.ipv4.isValid()) {
-            FEC_tbl.apply();
+            switch (FEC_tbl.apply().action_run){
+                ecmp_group: {
+                    ecmp_group_to_nhop.apply();
+                }
+            }
         }
 
         //mpls forward

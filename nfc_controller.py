@@ -19,8 +19,7 @@ class NFVController(object):
         self.init()
 
         # sorted by timeouts
-        self.current_reservations = {}
-        self.fun_type = {}
+        self.ecmp_group = {}
 
     def init(self):
         """Connects to switches and resets.
@@ -80,7 +79,7 @@ class NFVController(object):
                 if src_host == dst_host:
                     continue
                 else:
-                    self.add_reservation(src_host, dst_host);
+                    self.add_mpls_path(src_host, dst_host);
 
 
     def build_mpls_path(self, switches_path):
@@ -103,37 +102,77 @@ class NFVController(object):
         label_path.append(0)
         return label_path[::-1]
 
-    def add_reservation(self, src, dst):
+    def add_normal_path(self, src, dst, path):
+
+        # 1) ingress switch name
+        ingress_id = path[0]
+        label_path = self.build_mpls_path(path)
+        # 2) action name using `mpls_ingress_x_hop` set x as number of labels
+        action = "mpls_ingress_{}_hop".format(len(label_path)); action = "mpls_ingress_{}_hop".format(len(label_path));
+        # 3) src and dst ips (your match)
+        src_ip_lpm = self.topo.get_host_ip(src) + "/32"
+        dst_ip = self.topo.get_host_ip(dst)
+        # 4) make sure all your labels are strings and use them as action parameters
+        label_path = [str(label) for label in label_path]
+        table_name = "FEC_tbl";
+        self.controllers[ingress_id].table_add(table_name, action, [src_ip_lpm, dst_ip], label_path)
+
+        #TEST
+        path_str = "->".join(path)
+        print("Successful reservation({}->{}): path: {}".format(src, dst, path_str))
+        
+    def add_mpls_path(self, src, dst):
         """[summary]
 
         Args:
             src (str): src name
             dst (str): dst name
         """
+        self.ecmp_group = {sw_name: {} for sw_name in self.topo.get_p4switches().keys()}
         #MARK this path contains the host
         paths = self.topo.get_shortest_paths_between_nodes(src, dst)
-        paths = [x[1:-1] for x in paths]
-        # If there is an available path 
-        # MARK just the first
-        if paths:    
-            path = paths[0]
-            # 1) ingress switch name
-            ingress_id = path[0]
-            label_path = self.build_mpls_path(path)
-            # 2) action name using `mpls_ingress_x_hop` set x as number of labels
-            action = "mpls_ingress_{}_hop".format(len(label_path)); action = "mpls_ingress_{}_hop".format(len(label_path));
-            # 3) src and dst ips (your match)
-            src_ip_lpm = self.topo.get_host_ip(src) + "/32"
-            dst_ip = self.topo.get_host_ip(dst)
-            # 4) make sure all your labels are strings and use them as action parameters
-            label_path = [str(label) for label in label_path]
-            table_name = "FEC_tbl";
-            self.controllers[ingress_id].table_add(table_name, action, [src_ip_lpm, dst_ip], label_path)
+        paths = [x[1:-1] for x in paths] # remove the src and dst host
 
-            path_str = "->".join(path)
-            print("Successful reservation({}->{}): path: {}".format(src, dst, path_str))
+        # If there is an available pa
+        if paths and len(paths) == 1:    
+            path = paths[0]
+            self.add_normal_path(src, dst, path)
+        
+        elif len(paths) > 1 :
+            #Get the ECMP group
+            ingress_sw = paths[0][0] # MARK just one
+            next_hops = [x[1] for x in paths]
+            next_hops_sw = list(set(next_hops))# remove the duplicates
+            print("src: {}, dst: {}, next_hops: {}".format(src, dst, next_hops_sw)) # TEST
+
+            ecmp_group_id = 0;
+            if tuple(next_hops_sw) in self.ecmp_group[ingress_sw].keys():
+                ecmp_group_id = self.ecmp_group[ingress_sw][tuple(next_hops_sw)]
+            else:           
+                ecmp_group_id = len(self.ecmp_group[ingress_sw]) + 1
+                self.ecmp_group[ingress_sw][tuple(next_hops_sw)] = ecmp_group_id;
+
+            nhops = len(paths) #MARK
+
+            self.controllers[ingress_sw].table_add("FEC_tbl", "ecmp_group", [self.topo.get_host_ip(src) + "/32", self.topo.get_host_ip(dst)],
+                                [str(ecmp_group_id), str(nhops)]);
+            for id in range(nhops):
+                # 1) ingress switch name
+                label_path = self.build_mpls_path(paths[id])
+                # 2) action name using `mpls_ingress_x_hop` set x as number of labels
+                action = "mpls_ingress_{}_hop".format(len(label_path))
+                # 4) make sure all your labels are strings and use them as action parameters
+                label_path = [str(label) for label in label_path]
+                table_name = "ecmp_group_to_nhop";
+                
+                self.controllers[ingress_sw].table_add(table_name, action, [str(ecmp_group_id), str(id)], 
+                                    label_path);
+                # nhops - id - 1
+
+
         else:
              print("\033[91mRESERVATION FAILURE: no such path in src: {}, dst: {} available!\033[0m".format(src, dst))
+
 
 if __name__ == '__main__':
     controller = NFVController()
