@@ -1,3 +1,0 @@
-table_add mpls_tbl mpls_forward 1 0 => 62:3d:e5:ae:74:5b 1
-
-table_add mpls_tbl penultimate 2 1 => 9e:b2:69:e3:dc:6e 2
