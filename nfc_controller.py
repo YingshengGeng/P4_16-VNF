@@ -67,19 +67,11 @@ class NFVController(object):
             
             #MARK now the egress switch all connected host
             hosts = self.topo.get_hosts_connected_to(sw_name)
+            print(hosts)
             for host in hosts: 
-                controller.table_add("mpls_act", "mpls_finish", [str(self.topo.node_to_node_port_num(sw_name, host)), "1"], 
+                controller.table_add("mpls_act", "mpls_finish", [str(0), "1"], 
                                      [])
-                
-        # self.controllers["s1"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.1.11/32", "10.0.2.21"], ["1", "2", "3"]);
-        # self.controllers["s1"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.1.12/32", "10.0.2.22"], ["2", "2", "3"]);
-        # self.controllers["s1"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.1.12/32", "10.0.2.21"], ["1", "2", "3"]);
-        # self.controllers["s1"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.1.12/32", "10.0.2.22"], ["2", "2", "3"]);
-
-        # self.controllers["s2"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.2.21/32", "10.0.1.11"], ["1", "1", "3"]);
-        # self.controllers["s2"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.2.21/32", "10.0.1.12"], ["2", "1", "3"]);
-        # self.controllers["s2"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.2.22/32", "10.0.1.11"], ["1", "1", "3"]);
-        # self.controllers["s2"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.2.22/32", "10.0.1.12"], ["2", "1", "3"]);
+    
     def set_FEC_tbl_table(self):
         hosts =  self.topo.get_hosts().keys()
         for src_host in hosts:
