@@ -1,0 +1,63 @@
+{
+  "p4_src": "p4src/nfc.p4",
+  "cli": true,
+  "pcap_dump": true,
+  "enable_log": true,
+  "topology": {
+    "assignment_strategy": "mixed",
+    "links": [
+        ["h11", "s1"], ["h12", "s1"],
+        ["h21", "s2"], ["h22", "s2"],
+        ["s1", "s3"], ["s1", "s4"],
+        ["s2", "s4"], ["s2", "s3"]
+    ],
+    "hosts": {
+      "h11": {
+        "ip": "10.0.1.1/24", 
+        "mac": "00:00:0a:00:01:01",
+        "commands": [
+          "route add default gw 10.0.1.1 dev h11-eth0",
+          "arp -i h11-eth0 -s 10.0.1.1 00:00:0a:00:01:01"
+        ]
+      },
+      "h12": {
+        "ip": "10.0.1.2/24", 
+        "mac": "00:00:0a:00:01:01",
+        "commands": [
+          "route add default gw 10.0.1.2 dev h12-eth0",
+          "arp -i h12-eth0 -s 10.0.1.2 00:00:0a:00:01:02"
+        ]
+      },
+      "h21": {
+        "ip": "10.0.2.1/24", 
+        "mac": "00:00:0a:00:02:01",
+        "commands": [
+          "route add default gw 10.0.2.1 dev h21-eth0",
+          "arp -i h21-eth0 -s 10.0.2.1 00:00:0a:00:02:01"
+        ]
+      },
+      "h22": {
+        "ip": "10.0.2.2/24", 
+        "mac": "00:00:0a:00:02:02",
+        "commands": [
+          "route add default gw 10.0.2.2 dev h22-eth0",
+          "arp -i h22-eth0 -s 10.0.2.2 00:00:0a:00:02:02"
+        ]
+      }
+    },
+    "switches": {
+      "s1": {
+        "cli_input": "sx-commands/s1-commands.txt"
+      },
+      "s2": {
+        "cli_input": "sx-commands/s2-commands.txt"
+      },
+      "s3": {
+        "cli_input": "sx-commands/s3-commands.txt"
+      },
+      "s4": {
+        "cli_input": "sx-commands/s4-commands.txt"
+      }
+    }
+  }
+}
