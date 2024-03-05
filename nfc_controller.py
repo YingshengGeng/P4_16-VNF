@@ -82,13 +82,13 @@ class NFVController(object):
         # self.controllers["s2"].table_add("FEC_tbl", "mpls_ingress_3_hop", ["10.0.2.22/32", "10.0.1.12"], ["2", "1", "3"]);
     def set_FEC_tbl_table(self):
         hosts =  self.topo.get_hosts().keys()
-        for src_host in self.hosts:
-            for dst_host in self.hosts:
+        for src_host in hosts:
+            for dst_host in hosts:
                 #MARK consider the only one router
                 if src_host == dst_host:
                     continue
                 else:
-                    self.add_reservation(self.topo.get_host_ip(src_host), self.topo.get_host_ip(dst_host));
+                    self.add_reservation(src_host, dst_host);
 
 
     def build_mpls_path(self, switches_path):
@@ -118,9 +118,9 @@ class NFVController(object):
             src (str): src name
             dst (str): dst name
         """
-
-        paths = self.get_shortest_paths_between_nodes(src, dst)
-
+        #MARK this path contains the host
+        paths = self.topo.get_shortest_paths_between_nodes(src, dst)
+        paths = [x[1:-1] for x in paths]
         # If there is an available path 
         # MARK just the first
         if paths:    
@@ -148,5 +148,5 @@ if __name__ == '__main__':
 
     controller.set_ipv4_lpm_table()
     controller.set_mpls_act_table()
-
+    controller.set_FEC_tbl_table()
     cli = RSVPCLI(controller)
