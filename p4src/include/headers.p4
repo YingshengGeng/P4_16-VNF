@@ -17,6 +17,19 @@ const bit<16> TYPE_MPLS = 0x8847;
 #define CONST_MAX_LABELS 	128
 #define CONST_MAX_MPLS_HOPS 8
 
+
+#define SKETCH_BUCKET_LENGTH 4096
+#define SKETCH_CELL_BIT_WIDTH 32
+
+#define SKETCH_REGISTER(num) register<bit<SKETCH_CELL_BIT_WIDTH>>(SKETCH_BUCKET_LENGTH) sketch##num
+
+// #define SKETCH_READ(num, algorithm) hash(meta.index_sketch##num, HashAlgorithm.algorithm, (bit<16>)0, {hdr.ipv4.srcAddr, \
+//  hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol}, (bit<32>)SKETCH_BUCKET_LENGTH);\
+//  sketch##num.read(meta.value_sketch##num, meta.index_sketch##num);
+
+#define SKETCH_READ(num, algorithm) hash(meta.index_sketch##num, HashAlgorithm.algorithm, (bit<16>)0, {hdr.ipv4.srcAddr, \
+ hdr.ipv4.dstAddr}, (bit<32>)SKETCH_BUCKET_LENGTH);\
+ sketch##num.read(meta.value_sketch##num, meta.index_sketch##num);
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -83,6 +96,13 @@ struct metadata {
     bit<32> hash_index;
     bit<16> flowlet_id;
     bit<1> firewall;
+    
+    bit<32>value_sketch0;
+    bit<32>index_sketch0;
+    bit<32>value_sketch1;
+    bit<32>index_sketch1;
+    bit<32>value_sketch2;
+    bit<32>index_sketch2;
 }
 
 struct headers {

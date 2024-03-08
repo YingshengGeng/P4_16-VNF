@@ -6,6 +6,8 @@
 #include "include/parsers.p4"
 #include "include/mpls_extension.p4"
 
+
+
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
@@ -15,6 +17,11 @@ control MyIngress(inout headers hdr,
 
     
     register <bit<ID_WIDTH>>(REGISTER_SIZE) flowlet_to_id;
+
+    SKETCH_REGISTER(0);
+    SKETCH_REGISTER(1);
+    SKETCH_REGISTER(2);
+
     //MARK: the mpls labels is are reverse
     action mpls_ingress_1_hop(label_t label1) {
 
@@ -303,8 +310,17 @@ control MyIngress(inout headers hdr,
         
     }
 
+    action sketch_read(){
+        SKETCH_READ(0, crc32_custom);
+        SKETCH_READ(1, crc32_custom);
+        SKETCH_READ(2, crc32_custom);
+        //SKETCH_READ(3, crc32_custom);
+        //SKETCH_READ(4, crc32_custom);
+    }
+
     action mpls_forward_and_firewall_active(macAddr_t dstAddr, egressSpec_t port) {
         meta.firewall = (bit<1>) 1;
+        sketch_read();
         mpls_forward(dstAddr, port);
     }
 
@@ -413,8 +429,12 @@ control MyIngress(inout headers hdr,
 
             //MARK 其实检查一下动作也ok
             if (meta.firewall == (bit<1>)1) {
-                if(firewall_tbl.apply().hit) {
-                    return;//drop
+                // if(firewall_tbl.apply().hit) {
+                    // return;//drop
+                // }
+                if(meta.value_sketch0 > 0 || meta.value_sketch1  > 0 || meta.value_sketch2  > 0) {
+                    drop();
+                    return;
                 }
             }
             //Network Service basd on mpls label

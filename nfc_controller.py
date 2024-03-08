@@ -1,9 +1,11 @@
-import os
-import threading
-import time
+import os, socket, struct
 from p4utils.utils.helper import load_topo
 from p4utils.utils.sswitch_thrift_API import SimpleSwitchThriftAPI
 from cli import VNFCLI
+from crc import Crc
+
+crc32_polinomials = [0x04C11DB7, 0xEDB88320, 0xDB710641, 0x82608EDB, 0x741B8CD7, 0xEB31D82E,
+                     0xD663B05, 0xBA0DC66B, 0x32583499, 0x992C1A4C, 0x32583499, 0x992C1A4C]
 
 class NFVController(object):
     def __init__(self):
@@ -39,12 +41,55 @@ class NFVController(object):
             value: handle (str)
         """
         
+        self.registers = {}
+        
+
+
+    def flow_to_bytestream(self, flow):
+        return socket.inet_aton(flow[0]) + socket.inet_aton(flow[1])
+        # + struct.pack(">HHB",flow[2], flow[3], 6)
+    
+    def set_crc_custom_hashes(self):
+        for controller in self.controllers.values():
+            i = 0
+            for custom_crc32, width in sorted(self.custom_calcs.items()):
+                controller.set_crc32_parameters(custom_crc32, crc32_polinomials[i], 0xffffffff, 0xffffffff, True, True)
+                i+=1
+    def create_hashes(self):
+        self.hashes = []
+        for i in range(self.register_num):
+            self.hashes.append(Crc(32, crc32_polinomials[i], True, 0xffffffff, True, 0xffffffff))
+
+
+    def write_policy(self, sw_name, flow, mod):
+        controller = self.controllers[sw_name]
+        for i in range(self.register_num):
+            index = self.hashes[i].bit_by_bit_fast(self.flow_to_bytestream(flow)) % mod
+            # register_write(register_name, index, value)
+            past_nums = controller.register_read("sketch{}".format(i), index)
+            past_nums += 1
+            print("i:{}, past_nums:{}".format(i, past_nums))
+            controller.register_write("sketch{}".format(i), index, past_nums)
+    
+    def del_policy(self, sw_name, flow, mod):
+        controller = self.controllers[sw_name]
+        for i in range(self.register_num):
+            index = self.hashes[i].bit_by_bit_fast(self.flow_to_bytestream(flow)) % mod
+            # register_write(register_name, index, value)
+            past_nums = controller.register_read("sketch{}".format(i), index)
+            past_nums -= 1
+            print("i:{}, past_nums:{}".format(i, past_nums))
+            controller.register_write("sketch{}".format(i), index, past_nums)
 
     def init(self):
         """Connects to switches and resets.
         """
         self.connect_to_switches()
         self.reset_states()
+
+
+        self.set_crc_custom_hashes()
+        self.create_hashes()
 
     def reset_states(self):
         """Resets registers, tables, etc.
@@ -55,10 +100,13 @@ class NFVController(object):
         """Connects to all the switches in the topology and saves them
          in self.controllers.
         """
+        self.custom_calcs = {}
         for p4switch in self.topo.get_p4switches():
             thrift_port = self.topo.get_thrift_port(p4switch)
             self.controllers[p4switch] = SimpleSwitchThriftAPI(thrift_port) 
-
+            self.custom_calcs[p4switch] = self.controllers[p4switch].get_custom_crc_calcs()
+            self.register_num =  len(self.custom_calcs[p4switch])
+            
 
     def set_ipv4_lpm_table(self):
         """We set all the ipv4 table defaults to reach all the host in the network
@@ -226,8 +274,9 @@ class NFVController(object):
         #add the rule to the ingress switch
         src_ip = self.topo.get_host_ip(src)
         dst_ip = self.topo.get_host_ip(dst)
-        handle = self.controllers[sw_name].table_add("firewall_tbl", "drop", [src_ip, dst_ip], [])
-        self.firewall_policy[(src_ip, dst_ip)] = handle
+        # handle = self.controllers[sw_name].table_add("firewall_tbl", "drop", [src_ip, dst_ip], [])
+        self.write_policy(sw_name, (src_ip, dst_ip), 4096) #MARK 可以作为参数
+        self.firewall_policy[(src_ip, dst_ip)] = 0
         
         #change the mpls path to start the service
         label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())
@@ -273,8 +322,9 @@ class NFVController(object):
         print("gateway: {}".format(sw_name))
         src_ip = self.topo.get_host_ip(src)
         dst_ip = self.topo.get_host_ip(dst)
-        handle = self.firewall_policy[(src_ip, dst_ip)]
-        self.controllers[sw_name].table_delete("firewall_tbl", handle, True)
+        # handle = self.firewall_policy[(src_ip, dst_ip)]
+        # self.controllers[sw_name].table_delete("firewall_tbl", handle, True)
+        self.del_policy(sw_name, (src_ip, dst_ip), 4096)
 
         #change the mpls path to close the service
         label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())

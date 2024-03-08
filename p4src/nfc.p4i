@@ -946,6 +946,10 @@ const bit<16> TYPE_IPV4 = 0x0800;
 const bit<16> TYPE_MPLS = 0x8847;
 
 /* test size */
+# 26 "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/include/headers.p4"
+// #define SKETCH_READ(num, algorithm) hash(meta.index_sketch##num, HashAlgorithm.algorithm, (bit<16>)0, {hdr.ipv4.srcAddr, //  hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol}, (bit<32>)SKETCH_BUCKET_LENGTH);//  sketch##num.read(meta.value_sketch##num, meta.index_sketch##num);
+
+
 
 
 
@@ -1016,6 +1020,13 @@ struct metadata {
     bit<32> hash_index;
     bit<16> flowlet_id;
     bit<1> firewall;
+
+    bit<32>value_sketch0;
+    bit<32>index_sketch0;
+    bit<32>value_sketch1;
+    bit<32>index_sketch1;
+    bit<32>value_sketch2;
+    bit<32>index_sketch2;
 }
 
 struct headers {
@@ -1506,6 +1517,8 @@ control MyDeparser(packet_out packet, in headers hdr) {
 //     }
 # 8 "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4" 2
 
+
+
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
@@ -1515,6 +1528,11 @@ control MyIngress(inout headers hdr,
 
 
     register <bit<16>>(8192) flowlet_to_id;
+
+    register<bit<32>>(4096) sketch0;
+    register<bit<32>>(4096) sketch1;
+    register<bit<32>>(4096) sketch2;
+
     //MARK: the mpls labels is are reverse
     action mpls_ingress_1_hop(label_t label1) {
 
@@ -1803,8 +1821,17 @@ control MyIngress(inout headers hdr,
 
     }
 
+    action sketch_read(){
+        hash(meta.index_sketch0, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr}, (bit<32>)4096); sketch0.read(meta.value_sketch0, meta.index_sketch0);;
+        hash(meta.index_sketch1, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr}, (bit<32>)4096); sketch1.read(meta.value_sketch1, meta.index_sketch1);;
+        hash(meta.index_sketch2, HashAlgorithm.crc32_custom, (bit<16>)0, {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr}, (bit<32>)4096); sketch2.read(meta.value_sketch2, meta.index_sketch2);;
+        //SKETCH_READ(3, crc32_custom);
+        //SKETCH_READ(4, crc32_custom);
+    }
+
     action mpls_forward_and_firewall_active(macAddr_t dstAddr, egressSpec_t port) {
         meta.firewall = (bit<1>) 1;
+        sketch_read();
         mpls_forward(dstAddr, port);
     }
 
@@ -1913,8 +1940,12 @@ control MyIngress(inout headers hdr,
 
             //MARK 其实检查一下动作也ok
             if (meta.firewall == (bit<1>)1) {
-                if(firewall_tbl.apply().hit) {
-                    return;//drop
+                // if(firewall_tbl.apply().hit) {
+                    // return;//drop
+                // }
+                if(meta.value_sketch0 > 0 || meta.value_sketch1 > 0 || meta.value_sketch2 > 0) {
+                    drop();
+                    return;
                 }
             }
             //Network Service basd on mpls label
