@@ -13,6 +13,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {  
 
+    
+    register <bit<ID_WIDTH>>(REGISTER_SIZE) flowlet_to_id;
     //MARK: the mpls labels is are reverse
     action mpls_ingress_1_hop(label_t label1) {
 
@@ -248,15 +250,53 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
+    action update_flowlet_id() {
+        meta.flowlet_id = meta.flowlet_id + 1;
+        flowlet_to_id.write(meta.hash_index, meta.flowlet_id);
+    }
+
+    action read_flowlet_registers() {
+        //read the registers using the flowlet index you get from hashing the 5-tuple.
+        hash(
+            meta.hash_index,
+	        HashAlgorithm.crc16,
+	        (bit<32>)0,
+            { 
+                hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr,
+                hdr.tcp.srcPort,
+                hdr.tcp.dstPort,
+                hdr.ipv4.protocol
+            },
+	        (bit<32>)REGISTER_SIZE
+        );
+
+        flowlet_to_id.read(meta.flowlet_id, meta.hash_index);
+        update_flowlet_id();
+    }
+    
 
     action ecmp_group(bit<14> ecmp_group_id, bit<16> num_nhops) {
 
         meta.ecmp_group_id = ecmp_group_id;
+        read_flowlet_registers();
         //hash(output_field, (crc16 or crc32), (bit<1>)0, {fields to hash}, (bit<16>)modulo)
         //five tuple: src ip, dst ip, src port, dst port, protocol
-        hash(meta.ecmp_hash, HashAlgorithm.crc32, (bit<1>)0, 
-            {hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort,hdr.tcp.dstPort, hdr.ipv4.protocol}, 
-            num_nhops);
+        
+        hash(meta.ecmp_hash,
+	    HashAlgorithm.crc16,
+	    (bit<1>)0,
+	    { 
+            hdr.ipv4.srcAddr,
+	        hdr.ipv4.dstAddr,
+            hdr.tcp.srcPort,
+            hdr.tcp.dstPort,
+            hdr.ipv4.protocol,
+            meta.flowlet_id
+        },
+	    num_nhops);
+
+	    meta.ecmp_group_id = ecmp_group_id;
         
     }
 

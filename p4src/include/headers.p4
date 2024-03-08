@@ -5,6 +5,8 @@
 
 #define BLOOM_FILTER_ENTRIES 4096
 #define BLOOM_FILTER_BIT_WIDTH 1
+#define REGISTER_SIZE 8192
+#define ID_WIDTH 16
 
 const bit<16> TYPE_IPV4 = 0x0800;
 /* Ethernet type for MPLS protocol */
@@ -78,7 +80,8 @@ struct metadata {
     bit<2> direction_token;
     bit<14> ecmp_hash;
     bit<14> ecmp_group_id;
-
+    bit<32> hash_index;
+    bit<16> flowlet_id;
     bit<1> firewall;
 }
 
