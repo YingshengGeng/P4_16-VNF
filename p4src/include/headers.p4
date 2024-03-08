@@ -79,11 +79,7 @@ struct metadata {
     bit<14> ecmp_hash;
     bit<14> ecmp_group_id;
 
-    bit<32> hash_index1;
-    bit<32> hash_index2;
-
-    bit<32> bloom_res1;
-    bit<32> bloom_res2;
+    bit<1> firewall;
 }
 
 struct headers {

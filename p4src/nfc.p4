@@ -6,18 +6,12 @@
 #include "include/parsers.p4"
 #include "include/mpls_extension.p4"
 
-#define BLOOM_FILTER_ENTRIES 4096
-#define BLOOM_FILTER_BIT_WIDTH 32
-#define HASH
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
 *************************************************************************/
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {  
-    
-    //MARK:will extend
-    register<bit<BLOOM_FILTER_BIT_WIDTH>>(BLOOM_FILTER_ENTRIES) bloom_reg;
 
     //MARK: the mpls labels is are reverse
     action mpls_ingress_1_hop(label_t label1) {
@@ -266,6 +260,11 @@ control MyIngress(inout headers hdr,
         
     }
 
+    action mpls_forward_and_firewall_active(macAddr_t dstAddr, egressSpec_t port) {
+        meta.firewall = (bit<1>) 1;
+        mpls_forward(dstAddr, port);
+    }
+
     /* ******************* ipv4 Forward ******************* */
     table ipv4_lpm {
         key = {
@@ -309,6 +308,7 @@ control MyIngress(inout headers hdr,
             hdr.mpls[0].s: exact;
         }
         actions = {
+            mpls_forward_and_firewall_active;
             mpls_forward;
             mpls_pop;
             mpls_pop_and_forward;
@@ -319,7 +319,6 @@ control MyIngress(inout headers hdr,
         default_action = NoAction;
         size = TABLE_SIZE;
     }
-  
     /* ******************* MPLS function ******************* */
     
     /* ******************* MPLS Load Balance ******************** */
@@ -343,7 +342,18 @@ control MyIngress(inout headers hdr,
         size = TABLE_SIZE;
     }
     /* ******************* IPv4 FireWall ******************** */
-
+    table firewall_tbl {
+        key = {
+            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
+        default_action = NoAction;
+        size = TABLE_SIZE;
+    }
     apply {
         //Try add mpls header
         if (hdr.ipv4.isValid()) {
@@ -357,6 +367,13 @@ control MyIngress(inout headers hdr,
         //mpls forward
         if (hdr.mpls[0].isValid()) {
             mpls_act.apply();
+
+            //MARK 其实检查一下动作也ok
+            if (meta.firewall == (bit<1>)1) {
+                if(firewall_tbl.apply().hit) {
+                    return;//drop
+                }
+            }
             //Network Service basd on mpls label
             mpls_pop();
         }

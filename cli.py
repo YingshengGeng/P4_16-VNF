@@ -11,7 +11,7 @@ import sys
 import os
 import atexit
 
-class RSVPCLI( Cmd ):
+class VNFCLI( Cmd ):
     "Simple command-line interface to talk to nodes."
 
     prompt = 'rsvp-menu> '

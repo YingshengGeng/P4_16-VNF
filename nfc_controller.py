@@ -3,7 +3,7 @@ import threading
 import time
 from p4utils.utils.helper import load_topo
 from p4utils.utils.sswitch_thrift_API import SimpleSwitchThriftAPI
-from cli import RSVPCLI
+from cli import VNFCLI
 
 class NFVController(object):
     def __init__(self):
@@ -18,8 +18,26 @@ class NFVController(object):
         self.controllers = {}
         self.init()
 
-        # sorted by timeouts
         self.ecmp_group = {}
+        """
+            key: switch_name (str)
+            value: { path: ecmp_id } (dict)
+        """
+        self.ecmp_group = {sw_name: {} for sw_name in self.topo.get_p4switches().keys()}
+        
+        self.current_mpls_path = {}
+        """
+            key: label_path (list
+            value: handle (str)
+        """
+        self.current_mpls_path = {(src, dst):{} for src in self.topo.get_hosts().keys() for dst in self.topo.get_hosts().keys()}
+        
+        self.fire_wall_policy = {}
+        """
+            key: (src, dst) (tuple)
+            value: handle (str)
+        """
+        
 
     def init(self):
         """Connects to switches and resets.
@@ -42,7 +60,7 @@ class NFVController(object):
 
 
     def set_ipv4_lpm_table(self):
-        """We set all the table defaults to reach all the hosts/networks in the network
+        """We set all the ipv4 table defaults to reach all the host in the network
         """
         for sw_name, controller in self.controllers.items():
             # for all the hosts connected to this switch add the ipv4_lpm entry
@@ -52,7 +70,7 @@ class NFVController(object):
                                      [self.topo.get_host_mac(host), str(self.topo.node_to_node_port_num(sw_name, host))])
                 
     def set_mpls_act_table(self):
-        """We set all the table defaults to reach all the hosts/networks in the network
+        """We set all the mpls table defaults to reach all the hosts in the network
         """
         # controller.table_add(table_name, action, [match1, match2], [action_parameter1, action_parameter2])
         # for all switches
@@ -60,15 +78,20 @@ class NFVController(object):
             # for all switches connected to this switch add the 2 mplt_tbl entries
             switchs = self.topo.get_switches_connected_to(sw_name);
             for switch in switchs:
-                
+                #normal
                 controller.table_add("mpls_act", "mpls_forward", [str(self.topo.node_to_node_port_num(sw_name, switch)), "0"], 
                                      [self.topo.node_to_node_mac(switch, sw_name), str(self.topo.node_to_node_port_num(sw_name, switch))])
-            
+                #firewall
+                controller.table_add("mpls_act", "mpls_forward_and_firewall_active", [str(self.topo.node_to_node_port_num(sw_name, switch) + 100), "0"], 
+                                     [self.topo.node_to_node_mac(switch, sw_name), str(self.topo.node_to_node_port_num(sw_name, switch))])
             #MARK now the egress switch all connected host
             hosts = self.topo.get_hosts_connected_to(sw_name)
             print(hosts)
             for host in hosts: 
                 controller.table_add("mpls_act", "mpls_finish", [str(0), "1"], 
+                                     [])
+                #firewall
+                controller.table_add("mpls_act", "mpls_forward_and_firewall_active", [str(0 + 100), "1"], 
                                      [])
     
     def set_FEC_tbl_table(self):
@@ -115,12 +138,18 @@ class NFVController(object):
         # 4) make sure all your labels are strings and use them as action parameters
         label_path = [str(label) for label in label_path]
         table_name = "FEC_tbl";
-        self.controllers[ingress_id].table_add(table_name, action, [src_ip_lpm, dst_ip], label_path)
+        handle = self.controllers[ingress_id].table_add(table_name, action, [src_ip_lpm, dst_ip], label_path)
 
+        #save MARK the path now is static
+        if (src, dst) in self.current_mpls_path:
+            self.current_mpls_path[(src, dst)] = {tuple(label_path):handle}
+        else:
+            self.current_mpls_path[(src, dst)]  = {}
+            self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
         #TEST
         path_str = "->".join(path)
         print("Successful reservation({}->{}): path: {}".format(src, dst, path_str))
-        
+    
     def add_mpls_path(self, src, dst):
         """[summary]
 
@@ -137,7 +166,8 @@ class NFVController(object):
         if paths and len(paths) == 1:    
             path = paths[0]
             self.add_normal_path(src, dst, path)
-        
+           
+
         elif len(paths) > 1 :
             #Get the ECMP group
             ingress_sw = paths[0][0] # MARK just one
@@ -165,14 +195,96 @@ class NFVController(object):
                 label_path = [str(label) for label in label_path]
                 table_name = "ecmp_group_to_nhop";
                 
-                self.controllers[ingress_sw].table_add(table_name, action, [str(ecmp_group_id), str(id)], 
+                handle = self.controllers[ingress_sw].table_add(table_name, action, [str(ecmp_group_id), str(id)], 
                                     label_path);
+                #save MARK the path now is static
+                if (src, dst) in self.current_mpls_path:
+                    self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
+                else:
+                    self.current_mpls_path[(src, dst)] = {}
+                    self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
                 # nhops - id - 1
 
 
         else:
              print("\033[91mRESERVATION FAILURE: no such path in src: {}, dst: {} available!\033[0m".format(src, dst))
 
+    def add_firewall_policy(self, src, dst):
+        
+        sw_name = self.topo.get_host_gateway_name(src)
+        print("gateway: {}".format(sw_name))
+        #add the rule
+        src_ip = self.topo.get_host_ip(src)
+        dst_ip = self.topo.get_host_ip(dst)
+        handle = self.controllers[sw_name].table_add("firewall_tbl", "drop", [src_ip, dst_ip], [])
+        self.fire_wall_policy[(src_ip, dst_ip)] = handle
+        #change the path
+        label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())
+        print(label_paths_tuple)
+        #No ECMP
+        if len(label_paths_tuple) == 1:
+            table_name = "FEC_tbl";
+            label_path_tuple = label_paths_tuple[0]
+            handle = self.current_mpls_path[(src, dst)][label_path_tuple]
+            self.current_mpls_path[(src, dst)].pop(label_path_tuple)
+            action = "mpls_ingress_{}_hop".format(len(label_path_tuple))
+            #udpdate
+            new_label_path = list(label_path_tuple)
+            new_label_path[-1] = (str)((int)(new_label_path[-1]) + 100) #MARK the reverse
+            handle = self.controllers[sw_name].table_modify(table_name, action, handle, new_label_path)
+            print(new_label_path)
+            self.current_mpls_path[(src, dst)][tuple(new_label_path)] = handle
+       
+        elif len(label_paths_tuple) > 1:
+            table_name = "ecmp_group_to_nhop";
+            for label_path_tuple in label_paths_tuple:
+                handle = self.current_mpls_path[(src, dst)][label_path_tuple]
+                self.current_mpls_path[(src, dst)].pop(label_path_tuple)
+                action = "mpls_ingress_{}_hop".format(len(label_path_tuple))
+                #udpdate
+                new_label_path = list(label_path_tuple)
+                new_label_path[-1] = (str)((int)(new_label_path[-1]) + 100) #MARK the reverse
+                handle = self.controllers[sw_name].table_modify(table_name, action, handle, new_label_path)
+                self.current_mpls_path[(src, dst)][tuple(new_label_path)] = handle
+    def del_firewall_policy(self, src, dst):
+        
+        sw_name = self.topo.get_host_gateway_name(src)
+        print("gateway: {}".format(sw_name))
+        #add the rule
+        src_ip = self.topo.get_host_ip(src)
+        dst_ip = self.topo.get_host_ip(dst)
+        handle = self.fire_wall_policy[(src_ip, dst_ip)]
+        #MARK 加一个handle的存储，其实第一个删除也就是都删除了
+        self.controllers[sw_name].table_delete("firewall_tbl", handle, True)
+
+        #change the path
+        label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())
+        print(label_paths_tuple)
+        #No ECMP
+        if len(label_paths_tuple) == 1:
+            table_name = "FEC_tbl";
+            label_path_tuple = label_paths_tuple[0]
+            handle = self.current_mpls_path[(src, dst)][label_path_tuple]
+            self.current_mpls_path[(src, dst)].pop(label_path_tuple)
+            action = "mpls_ingress_{}_hop".format(len(label_path_tuple))
+            #udpdate
+            new_label_path = list(label_path_tuple)
+            new_label_path[-1] = (str)((int)(new_label_path[-1]) - 100) #MARK decrease
+            handle = self.controllers[sw_name].table_modify(table_name, action, handle, new_label_path)
+            print(new_label_path)
+            self.current_mpls_path[(src, dst)][tuple(new_label_path)] = handle
+       
+        elif len(label_paths_tuple) > 1:
+            table_name = "ecmp_group_to_nhop";
+            for label_path_tuple in label_paths_tuple:
+                handle = self.current_mpls_path[(src, dst)][label_path_tuple]
+                self.current_mpls_path[(src, dst)].pop(label_path_tuple)
+                action = "mpls_ingress_{}_hop".format(len(label_path_tuple))
+                #udpdate
+                new_label_path = list(label_path_tuple)
+                new_label_path[-1] = (str)((int)(new_label_path[-1]) - 100) #MARK the reverse
+                handle = self.controllers[sw_name].table_modify(table_name, action, handle, new_label_path)
+                self.current_mpls_path[(src, dst)][tuple(new_label_path)] = handle
 
 if __name__ == '__main__':
     controller = NFVController()
@@ -180,4 +292,6 @@ if __name__ == '__main__':
     controller.set_ipv4_lpm_table()
     controller.set_mpls_act_table()
     controller.set_FEC_tbl_table()
-    cli = RSVPCLI(controller)
+    controller.add_firewall_policy("h21", "h11")
+    # controller.del_firewall_policy("h21", "h11")
+    cli = VNFCLI(controller)
