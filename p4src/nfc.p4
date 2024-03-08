@@ -257,6 +257,19 @@ control MyIngress(inout headers hdr,
 
     action read_flowlet_registers() {
         //read the registers using the flowlet index you get from hashing the 5-tuple.
+        // hash(
+        //     meta.hash_index,
+	    //     HashAlgorithm.crc16,
+	    //     (bit<32>)0,
+        //     { 
+        //         hdr.ipv4.srcAddr,
+        //         hdr.ipv4.dstAddr,
+        //         hdr.tcp.srcPort,
+        //         hdr.tcp.dstPort,
+        //         hdr.ipv4.protocol
+        //     },
+	    //     (bit<32>)REGISTER_SIZE
+        // );
         hash(
             meta.hash_index,
 	        HashAlgorithm.crc16,
@@ -272,7 +285,7 @@ control MyIngress(inout headers hdr,
         );
 
         flowlet_to_id.read(meta.flowlet_id, meta.hash_index);
-        update_flowlet_id();
+        
     }
     
 
@@ -283,20 +296,25 @@ control MyIngress(inout headers hdr,
         //hash(output_field, (crc16 or crc32), (bit<1>)0, {fields to hash}, (bit<16>)modulo)
         //five tuple: src ip, dst ip, src port, dst port, protocol
         
-        hash(meta.ecmp_hash,
-	    HashAlgorithm.crc16,
-	    (bit<1>)0,
-	    { 
-            hdr.ipv4.srcAddr,
-	        hdr.ipv4.dstAddr,
-            hdr.tcp.srcPort,
-            hdr.tcp.dstPort,
-            hdr.ipv4.protocol,
-            meta.flowlet_id
-        },
-	    num_nhops);
-
-	    meta.ecmp_group_id = ecmp_group_id;
+        // hash(meta.ecmp_hash,
+	    // HashAlgorithm.crc16,
+	    // (bit<1>)0,
+	    // { 
+        //     hdr.ipv4.srcAddr,
+	    //     hdr.ipv4.dstAddr,
+        //     hdr.tcp.srcPort,
+        //     hdr.tcp.dstPort,
+        //     hdr.ipv4.protocol,
+        //     meta.flowlet_id
+        // },
+	    // num_nhops);
+        
+        if (meta.flowlet_id == num_nhops) {
+            meta.flowlet_id = 0;
+        }
+       
+        meta.ecmp_hash = (bit<14>)meta.flowlet_id;
+        update_flowlet_id();
         
     }
 
