@@ -27,11 +27,12 @@ class NFVController(object):
         
         self.current_mpls_path = {}
         """
-            key: label_path (list
+            key: label_path (list)
             value: handle (str)
         """
         self.current_mpls_path = {(src, dst):{} for src in self.topo.get_hosts().keys() for dst in self.topo.get_hosts().keys()}
-        
+        self.current_path = {(src, dst):[] for src in self.topo.get_hosts().keys() for dst in self.topo.get_hosts().keys()}
+
         self.firewall_policy = {}
         """
             key: (src, dst) (tuple)
@@ -146,9 +147,10 @@ class NFVController(object):
         #record the information in current_mpls_path
         if (src, dst) in self.current_mpls_path:
             self.current_mpls_path[(src, dst)] = {tuple(label_path):handle}
-        else:
-            self.current_mpls_path[(src, dst)]  = {}
-            self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
+            self.current_path[(src, dst)].append(path)
+        
+
+        
         #TEST
         path_str = "->".join(path)
         print("Successful reservation({}->{}): path: {}".format(src, dst, path_str))
@@ -204,9 +206,8 @@ class NFVController(object):
                 #record the information in current_mpls_path
                 if (src, dst) in self.current_mpls_path:
                     self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
-                else:
-                    self.current_mpls_path[(src, dst)] = {}
-                    self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
+                    self.current_path[(src, dst)].append(paths[id])
+                    
 
 
         else:
@@ -283,13 +284,13 @@ class NFVController(object):
             table_name = "FEC_tbl";
             label_path_tuple = label_paths_tuple[0]
             self.change_firewall_mpls_path(src, dst, table_name, sw_name, label_path_tuple, -100)
-       
+
         elif len(label_paths_tuple) > 1:
             table_name = "ecmp_group_to_nhop";
             for label_path_tuple in label_paths_tuple:
                 handle = self.current_mpls_path[(src, dst)][label_path_tuple]
                 self.change_firewall_mpls_path(src, dst, table_name, sw_name, label_path_tuple, -100)
-
+        self.firewall_policy.pop((src_ip, dst_ip)) 
 if __name__ == '__main__':
     controller = NFVController()
 

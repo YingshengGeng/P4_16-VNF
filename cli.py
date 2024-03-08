@@ -14,7 +14,7 @@ import atexit
 class VNFCLI( Cmd ):
     "Simple command-line interface to talk to nodes."
 
-    prompt = 'rsvp-menu> '
+    prompt = 'nfv-menu> '
 
     def __init__( self, controller, stdin=sys.stdin, script=None,
                   *args, **kwargs ):
@@ -42,14 +42,14 @@ class VNFCLI( Cmd ):
         """
         """
         print('======================================================================')
-        print('Welcome to the NFC CLI')
+        print('Welcome to the NFV CLI')
         print('======================================================================')
         print('You can now make reservations for your hosts in the network.')
-        print('To add a reservation run:')
-        print('add_reservation <src> <dst> <duration> <bw> <priority>')
+        print('To add a firewall policy run:')
+        print('add_fw_entry <src> <dst>')
         print('')
         print('To delete a reservation run: ')
-        print('del_reservation <src> <dst>')
+        print('del_fw_entry <src> <dst>')
         print('')
 
 
@@ -66,7 +66,7 @@ class VNFCLI( Cmd ):
         except ImportError:
             pass
         else:
-            history_path = os.path.expanduser( '~/.rsvp_controller_history' )
+            history_path = os.path.expanduser( '~/.nfv_controller_history' )
             if os.path.isfile( history_path ):
                 read_history_file( history_path )
                 set_history_length( 1000 )
@@ -132,53 +132,33 @@ class VNFCLI( Cmd ):
         return isatty( self.stdin.fileno() )
 
     """
-    RSVP COMMANDS
+    NFV COMMANDS
     """
 
-    def do_add_reservation(self, line=""):
-        """Adds a reservation using mpls.
-        add_reservation <src> <dst> <duration> <bw> <priority>
+
+    def do_print_mpls_path(self, line = ""):
+        """Prints current mpls paths"""
+
+        print("Current MPLS Paths:")
+        print("---------------------")
+        for i, ((src, dst), datas) in enumerate(self.controller.current_path.items()):
+            for data in datas:
+                print("{} {}->{} : {}".format(i, src, dst, 
+                    "->".join(data)))
+    
+    def do_print_fw_policy(self, line=""):
+        """Prints current firewall policies"""
+
+        print("Current FireWall Policies:")
+        print("---------------------")
+        for src, dst in self.controller.firewall_policy.keys():
+            print("{} -> {}".format(src, dst))
+        
+    def do_add_fw_entry(self, line=""):
         """
-
-        # geta rguments
-        args = line.split()
-        # defaults
-        duration = 9999
-        bw = 1
-        priority = 1
-
-        if len(args) < 2:
-            print("Not enough args!")
-            return
-        
-        elif len(args) == 2:
-            src, dst =  args
-        
-        elif len(args) == 3:
-            src, dst, duration =  args
-        
-        elif len(args) == 4:
-            src, dst, duration, bw =  args
-        
-        elif len(args) == 5:
-            src, dst, duration, bw,  priority =  args
-        
-        else:
-            print("Too many args!")
-            return
-
-        # casts
-        duration = float(duration)
-        bw = float(bw)
-        priority = int(priority)
-        
-        # add entry
-        res = self.controller.add_reservation(src, dst, duration, bw,  priority)
-
-
-    def do_del_reservation(self, line=""):
-        """Deletes a reservation"""
-
+        Adds a firewall policy.
+        add_fw_entry <src> <dst>
+        """
         # gets arguments
         args = line.split()
 
@@ -194,64 +174,26 @@ class VNFCLI( Cmd ):
             return
 
         # add entry
-        res = self.controller.del_reservation(src, dst)
-
-    def do_del_all_reservations(self, line =""):
-        """Deletes all the reservations"""
-
-        res = self.controller.del_all_reservations()
-
-    def do_print_reservations(self, line = ""):
-        """Prints current reservations"""
-
-        print("Current Reservations:")
-        print("---------------------")
-        for i, ((src, dst), data) in enumerate(self.controller.current_reservations.items()):
-            print("{:>3} {}->{} : {}, bw:{}, priority:{}, timeout:{}".format(i, src, dst, 
-                "->".join(data['path']), data['bw'], data['priority'], data["timeout"] ))
+        res = self.controller.add_firewall_policy(src, dst)
     
-    def do_print_link_capacity(self, line=""):
-        """Prints current link capacities"""
-
-        print("Current Link Capacities:")
-        print("---------------------")
-        for edge, bw in self.controller.links_capacity.items():
-            print("{} -> {}".format(edge, bw))
-        
-    def do_add_fw_entry(self, line=""):
-
+    def do_del_fw_entry(self, line=""):
+        """
+        Delete a firewall policy.
+        del_fw_entry <src> <dst>
+        """
         # gets arguments
         args = line.split()
 
-        if len(args) < 3:
+        if len(args) < 2:
             print("Not enough args!")
             return
         
-        elif len(args) == 3:
-            src, dst, sw_id =  args[:3]
+        elif len(args) == 2:
+            src, dst =  args[:2]
         
         else:
             print("Too many args!")
             return
 
         # add entry
-        res = self.controller.add_fw_entry(src, dst, sw_id)
-
-    def do_add_lb_entry(self, line=""):
-
-        # gets arguments
-        args = line.split()
-
-        if len(args) < 3:
-            print("Not enough args!")
-            return
-        
-        elif len(args) == 3:
-            src, dst, sw_id =  args[:3]
-        
-        else:
-            print("Too many args!")
-            return
-
-        # add entry
-        res = self.controller.add_lb_entry(src, dst, sw_id)
+        res = self.controller.del_firewall_policy(src, dst)
