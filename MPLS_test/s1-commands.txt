@@ -1,0 +1,13 @@
+#externel
+table_add  ipv4_lpm ipv4_forward 10.0.1.11/32 =>  00:00:0a:00:01:0b 1
+table_add  ipv4_lpm ipv4_forward 10.0.1.12/32 =>  00:00:0a:00:01:0c 2
+
+#mpls_header
+table_add  FEC_tbl mpls_ingress_3_hop 10.0.1.0/24 10.0.2.21 =>  1 2 3
+table_add  FEC_tbl mpls_ingress_3_hop 10.0.1.0/24 10.0.2.22 =>  2 2 3
+
+#mpls forward 
+table_add  mpls_act mpls_forward 3 0 => 86:92:45:17:ac:f4 3
+table_add  mpls_act mpls_forward 4 0 => 52:46:50:00:d9:b8 4
+table_add  mpls_act mpls_finish 1 1 => 
+table_add  mpls_act mpls_finish 2 1 => 
