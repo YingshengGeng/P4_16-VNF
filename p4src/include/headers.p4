@@ -3,8 +3,8 @@
 #include <v1model.p4>
 
 
-#define BLOOM_FILTER_ENTRIES 4096
-#define BLOOM_FILTER_BIT_WIDTH 1
+// #define BLOOM_FILTER_ENTRIES 4096
+// #define BLOOM_FILTER_BIT_WIDTH 1
 #define REGISTER_SIZE 8192
 #define ID_WIDTH 16
 
@@ -77,7 +77,7 @@ header tcp_t{
 }
 
 struct metadata {
-    bit<2> direction_token;
+    // bit<2> direction_token;
     bit<14> ecmp_hash;
     bit<14> ecmp_group_id;
     bit<32> hash_index;
