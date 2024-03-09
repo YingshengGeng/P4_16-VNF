@@ -297,6 +297,6 @@ if __name__ == '__main__':
     controller.set_ipv4_lpm_table()
     controller.set_mpls_act_table()
     controller.set_FEC_tbl_table()
-    controller.add_firewall_policy("h21", "h11")
-    controller.del_firewall_policy("h21", "h11")
+    # controller.add_firewall_policy("h21", "h11")
+    # controller.del_firewall_policy("h21", "h11")
     cli = VNFCLI(controller)

@@ -1,3 +1,0 @@
-#mpls forward 
-table_add  mpls_act mpls_forward 1 0 => 8e:9e:04:f6:e5:41 1
-table_add  mpls_act mpls_forward 2 0 => 52:d4:72:e0:09:e1 2

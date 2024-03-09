@@ -13,36 +13,12 @@
     ],
     "hosts": {
       "h11": {
-        "ip": "10.0.1.1/24", 
-        "mac": "00:00:0a:00:01:01",
-        "commands": [
-          "route add default gw 10.0.1.1 dev h11-eth0",
-          "arp -i h11-eth0 -s 10.0.1.1 00:00:0a:00:01:01"
-        ]
       },
       "h12": {
-        "ip": "10.0.1.2/24", 
-        "mac": "00:00:0a:00:01:01",
-        "commands": [
-          "route add default gw 10.0.1.2 dev h12-eth0",
-          "arp -i h12-eth0 -s 10.0.1.2 00:00:0a:00:01:02"
-        ]
       },
       "h21": {
-        "ip": "10.0.2.1/24", 
-        "mac": "00:00:0a:00:02:01",
-        "commands": [
-          "route add default gw 10.0.2.1 dev h21-eth0",
-          "arp -i h21-eth0 -s 10.0.2.1 00:00:0a:00:02:01"
-        ]
       },
       "h22": {
-        "ip": "10.0.2.2/24", 
-        "mac": "00:00:0a:00:02:02",
-        "commands": [
-          "route add default gw 10.0.2.2 dev h22-eth0",
-          "arp -i h22-eth0 -s 10.0.2.2 00:00:0a:00:02:02"
-        ]
       }
     },
     "switches": {
