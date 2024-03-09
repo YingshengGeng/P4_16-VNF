@@ -278,23 +278,6 @@ control MyIngress(inout headers hdr,
 
         meta.ecmp_group_id = ecmp_group_id;
         read_flowlet_registers();
-        //hash(output_field, (crc16 or crc32), (bit<1>)0, {fields to hash}, (bit<16>)modulo)
-        //five tuple: src ip, dst ip, src port, dst port, protocol
-        
-        // hash(
-        //     meta.ecmp_hash,
-        //     HashAlgorithm.crc16,
-        //     (bit<1>)0,
-        //     { 
-        //         hdr.ipv4.srcAddr,
-        //         hdr.ipv4.dstAddr,
-        //         hdr.tcp.srcPort,
-        //         hdr.tcp.dstPort,
-        //         hdr.ipv4.protocol,
-        //         meta.flowlet_id
-        //     },
-        //     num_nhops
-        // );
         if (meta.flowlet_id == num_nhops) {
             meta.flowlet_id = 0;
         }
