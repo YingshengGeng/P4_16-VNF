@@ -4,7 +4,6 @@
 #include "include/headers.p4"
 #include "include/checksum.p4"
 #include "include/parsers.p4"
-#include "include/mpls_extension.p4"
 
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
@@ -279,7 +278,6 @@ control MyIngress(inout headers hdr,
 
         meta.ecmp_group_id = ecmp_group_id;
         read_flowlet_registers();
-        update_flowlet_id();
         //hash(output_field, (crc16 or crc32), (bit<1>)0, {fields to hash}, (bit<16>)modulo)
         //five tuple: src ip, dst ip, src port, dst port, protocol
         
@@ -297,10 +295,12 @@ control MyIngress(inout headers hdr,
         //     },
         //     num_nhops
         // );
+        if (meta.flowlet_id == num_nhops) {
+            meta.flowlet_id = 0;
+        }
 
-	    meta.ecmp_group_id = ecmp_group_id;
-
-        
+        meta.ecmp_hash = (bit<14>)meta.flowlet_id;
+        update_flowlet_id();
     }
 
     action mpls_forward_and_firewall_active(macAddr_t dstAddr, egressSpec_t port) {
