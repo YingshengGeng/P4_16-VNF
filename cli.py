@@ -143,8 +143,9 @@ class VNFCLI( Cmd ):
         print("---------------------")
         for i, ((src, dst), datas) in enumerate(self.controller.current_path.items()):
             for data in datas:
-                print("{} {}->{} : {}".format(i, src, dst, 
-                    "->".join(data)))
+                if (len(data) > 1):
+                    print("{} {}->{} : {}".format(i, src, dst, 
+                        "->".join(data)))
     
     def do_print_fw_policy(self, line=""):
         """Prints current firewall policies"""

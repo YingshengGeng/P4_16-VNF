@@ -96,7 +96,7 @@ class NFVController(object):
                 controller.table_add("mpls_act", "mpls_forward_and_firewall_active", [str(0 + 100), "1"], 
                                      [])
     
-    def set_FEC_tbl_table(self):
+    def set_FEC_tbl_table(self,  is_load_balance = True):
         """We set all the mpls FEC defaults to reach all the hosts in the network
         """
         hosts =  self.topo.get_hosts().keys()
@@ -106,7 +106,7 @@ class NFVController(object):
                 if src_host == dst_host:
                     continue
                 else:
-                    self.add_mpls_path(src_host, dst_host);
+                    self.add_mpls_path(src_host, dst_host, is_load_balance);
 
 
     def build_mpls_path(self, switches_path):
@@ -155,7 +155,7 @@ class NFVController(object):
         path_str = "->".join(path)
         print("Successful reservation({}->{}): path: {}".format(src, dst, path_str))
     
-    def add_mpls_path(self, src, dst):
+    def add_mpls_path(self, src, dst, is_load_balance = True):
         """We set the mpls FEC defaults to reach dst from src
 
         Args:
@@ -174,40 +174,43 @@ class NFVController(object):
            
         # If there are more than one available path, add an ecmp group
         elif len(paths) > 1 :
-            #use the next hops to identify an group
-            ecmp_group_id = 0;
-            ingress_sw = paths[0][0] # MARK just one
-            next_hops = [x[1] for x in paths]
-            next_hops_sw = list(set(next_hops))# remove the duplicates
-            print("src: {}, dst: {}, next_hops: {}".format(src, dst, next_hops_sw)) # TEST
+            if (is_load_balance):
+                #use the next hops to identify an group
+                ecmp_group_id = 0;
+                ingress_sw = paths[0][0] # MARK just one
+                next_hops = [x[1] for x in paths]
+                next_hops_sw = list(set(next_hops))# remove the duplicates
+                print("src: {}, dst: {}, next_hops: {}".format(src, dst, next_hops_sw)) # TEST
 
-            if tuple(next_hops_sw) in self.ecmp_group[ingress_sw].keys():
-                ecmp_group_id = self.ecmp_group[ingress_sw][tuple(next_hops_sw)]
-            else:           
-                ecmp_group_id = len(self.ecmp_group[ingress_sw]) + 1
-                self.ecmp_group[ingress_sw][tuple(next_hops_sw)] = ecmp_group_id;
+                if tuple(next_hops_sw) in self.ecmp_group[ingress_sw].keys():
+                    ecmp_group_id = self.ecmp_group[ingress_sw][tuple(next_hops_sw)]
+                else:           
+                    ecmp_group_id = len(self.ecmp_group[ingress_sw]) + 1
+                    self.ecmp_group[ingress_sw][tuple(next_hops_sw)] = ecmp_group_id;
 
-            nhops = len(paths) #MARK
-            self.controllers[ingress_sw].table_add("FEC_tbl", "ecmp_group", [self.topo.get_host_ip(src) + "/32", self.topo.get_host_ip(dst)],
-                                [str(ecmp_group_id), str(nhops)]);
-            #add relevent entry to ecmp_group_to_nhop table
-            for id in range(nhops):
-                # 1) ingress switch name
-                label_path = self.build_mpls_path(paths[id])
-                # 2) action name using `mpls_ingress_x_hop` set x as number of labels
-                action = "mpls_ingress_{}_hop".format(len(label_path))
-                # 4) make sure all your labels are strings and use them as action parameters
-                label_path = [str(label) for label in label_path]
-                table_name = "ecmp_group_to_nhop";
-                
-                handle = self.controllers[ingress_sw].table_add(table_name, action, [str(ecmp_group_id), str(id)], 
-                                    label_path);
-                
-                #record the information in current_mpls_path
-                if (src, dst) in self.current_mpls_path:
-                    self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
-                    self.current_path[(src, dst)].append(paths[id])
+                nhops = len(paths) #MARK
+                self.controllers[ingress_sw].table_add("FEC_tbl", "ecmp_group", [self.topo.get_host_ip(src) + "/32", self.topo.get_host_ip(dst)],
+                                    [str(ecmp_group_id), str(nhops)]);
+                #add relevent entry to ecmp_group_to_nhop table
+                for id in range(nhops):
+                    # 1) ingress switch name
+                    label_path = self.build_mpls_path(paths[id])
+                    # 2) action name using `mpls_ingress_x_hop` set x as number of labels
+                    action = "mpls_ingress_{}_hop".format(len(label_path))
+                    # 4) make sure all your labels are strings and use them as action parameters
+                    label_path = [str(label) for label in label_path]
+                    table_name = "ecmp_group_to_nhop";
                     
+                    handle = self.controllers[ingress_sw].table_add(table_name, action, [str(ecmp_group_id), str(id)], 
+                                        label_path);
+                    
+                    #record the information in current_mpls_path
+                    if (src, dst) in self.current_mpls_path:
+                        self.current_mpls_path[(src, dst)][tuple(label_path)] = handle
+                        self.current_path[(src, dst)].append(paths[id])
+            else:
+                path = paths[0]
+                self.add_normal_path(src, dst, path)
 
 
         else:
@@ -231,7 +234,7 @@ class NFVController(object):
         
         #change the mpls path to start the service
         label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())
-        print(label_paths_tuple)
+        print("Orighal mpls label: \n{}\n{}".format(list(label_paths_tuple[0]), list(label_paths_tuple[1])))
         #If no ECMP, directly change it  
         if len(label_paths_tuple) == 1:
             table_name = "FEC_tbl";
@@ -278,7 +281,7 @@ class NFVController(object):
 
         #change the mpls path to close the service
         label_paths_tuple = list(self.current_mpls_path[(src, dst)].keys())
-        print(label_paths_tuple)
+        print("Orighal mpls label: \n{}\n{}".format(label_paths_tuple[0], label_paths_tuple[1]))
         #No ECMP
         if len(label_paths_tuple) == 1:
             table_name = "FEC_tbl";
@@ -296,7 +299,8 @@ if __name__ == '__main__':
 
     controller.set_ipv4_lpm_table()
     controller.set_mpls_act_table()
-    controller.set_FEC_tbl_table()
+    controller.set_FEC_tbl_table(is_load_balance= True)
+    # controller.set_FEC_tbl_table(is_load_balance= False)
     # controller.add_firewall_policy("h21", "h11")
     # controller.del_firewall_policy("h21", "h11")
     cli = VNFCLI(controller)
