@@ -416,7 +416,7 @@
         "column" : 29,
         "source_fragment" : "flowlet_to_id"
       },
-      "size" : 8192,
+      "size" : 1024,
       "bitwidth" : 16
     },
     {
