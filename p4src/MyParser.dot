@@ -1,0 +1,20 @@
+digraph MyParser{
+start [shape=rectangle,label="start
+(hdr.ethernet.etherType)"]
+parse_mpls [shape=rectangle,label="parse_mpls
+(hdr.mpls.last.s)"]
+parse_ipv4 [shape=rectangle,label="parse_ipv4
+(hdr.ipv4.protocol)"]
+parse_tcp [shape=rectangle,label="parse_tcp"]
+accept [shape=rectangle,label="accept"]
+reject [shape=rectangle,label="reject"]
+start -> parse_mpls [label="16w0x8847"]
+start -> parse_ipv4 [label="16w0x800"]
+start -> accept [label="default"]
+parse_mpls -> parse_mpls [label="1w0"]
+parse_mpls -> parse_ipv4 [label="1w1"]
+parse_mpls -> accept [label="default"]
+parse_ipv4 -> parse_tcp [label="8w6"]
+parse_ipv4 -> accept [label="default"]
+parse_tcp -> accept [label="always"]
+}

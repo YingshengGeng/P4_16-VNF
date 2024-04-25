@@ -1,0 +1,46 @@
+digraph MyIngress {
+subgraph cluster {
+graph [
+label="", labeljust=r, style=bold];
+0[label=__START__, margin="", shape=rectangle, style=solid];
+1[label=__EXIT__, margin="", shape=rectangle, style=solid];
+2[label="hasReturned = 0;", margin="", shape=rectangle, style=solid];
+3[label="hdr.ipv4.isValid();", margin="", shape=rectangle, style=solid];
+4[label="MyIngress.FEC_tbl", margin="", shape=ellipse, style=solid];
+5[label="MyIngress.ecmp_group_to_nhop", margin="", shape=ellipse, style=solid];
+6[label="hdr.mpls[0].isValid();", margin="", shape=rectangle, style=solid];
+7[label="MyIngress.mpls_act", margin="", shape=ellipse, style=solid];
+8[label="meta.firewall == 1;", margin="", shape=rectangle, style=solid];
+9[label="meta.value_sketch0 > 0 || meta.value_sketch1 > 0 || meta.value_sketch2 > 0;", margin="", shape=rectangle, style=solid];
+10[label="drop_2/drop();
+hasReturned = 1;", margin="", shape=rectangle, style=solid];
+11[label="hasReturned;", margin="", shape=rectangle, style=solid];
+12[label="mpls_pop_1/mpls_pop();", margin="", shape=rectangle, style=solid];
+13[label="hasReturned;", margin="", shape=rectangle, style=solid];
+14[label="hdr.ipv4.isValid() && !hdr.mpls[0].isValid();", margin="", shape=rectangle, style=solid];
+15[label="MyIngress.ipv4_lpm", margin="", shape=ellipse, style=solid];
+0 -> 2[label=""];
+2 -> 3[label=""];
+3 -> 4[label=TRUE];
+3 -> 6[label=FALSE];
+4 -> 5[label="ecmp_group;"];
+4 -> 6[label=default];
+5 -> 6[label=""];
+6 -> 7[label=TRUE];
+6 -> 13[label=FALSE];
+7 -> 8[label=""];
+8 -> 9[label=TRUE];
+8 -> 11[label=FALSE];
+9 -> 10[label=TRUE];
+9 -> 11[label=FALSE];
+10 -> 11[label=""];
+11 -> 12[label=FALSE];
+11 -> 13[label=TRUE];
+12 -> 13[label=""];
+13 -> 14[label=FALSE];
+13 -> 1[label=TRUE];
+14 -> 15[label=TRUE];
+14 -> 1[label=FALSE];
+15 -> 1[label=""];
+}
+}

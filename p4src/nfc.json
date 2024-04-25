@@ -413,10 +413,10 @@
       "source_info" : {
         "filename" : "/home/gys/文档/P4/p4-learning/exercises/experiment/p4src/nfc.p4",
         "line" : 19,
-        "column" : 29,
+        "column" : 27,
         "source_fragment" : "flowlet_to_id"
       },
-      "size" : 1024,
+      "size" : 32,
       "bitwidth" : 16
     },
     {

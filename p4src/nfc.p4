@@ -16,7 +16,7 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {  
 
     
-    register <bit<ID_WIDTH>>(1024) flowlet_to_id;
+    register <bit<ID_WIDTH>>(32) flowlet_to_id;
 
     SKETCH_REGISTER(0);
     SKETCH_REGISTER(1);
